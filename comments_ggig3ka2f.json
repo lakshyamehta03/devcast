@@ -1,0 +1,293 @@
+{
+    "data": [
+        {
+            "id": "YBWDpV8jy",
+            "content": "Appreciate your posts and thanks for the detail. However, you could clarify and edit the sentence in option B better. The last part says the Lambda can go through one of them; it's a little bit confusing, which I thought you meant the session mode for the workers.",
+            "contentHtml": "<p>Appreciate your posts and thanks for the detail. However, you could clarify and edit the sentence in option B better. The last part says the Lambda can go through one of them; it\u2019s a little bit confusing, which I thought you meant the session mode for the workers.</p>\n",
+            "createdAt": "2026-05-21T13:36:37.633Z",
+            "lastUpdatedAt": null,
+            "permalink": "https://app.daily.dev/posts/gGig3KA2F#c-YBWDpV8jy",
+            "numUpvotes": 2,
+            "numAwards": 0,
+            "author": {
+                "id": "ghoPlrvzBMngo7zpPFzEo",
+                "name": "Mehdi Moozeh",
+                "username": "mehdimoozeh",
+                "image": "https://media.daily.dev/image/upload/s--VdrCIARW--/f_auto/v1779370624/avatars/avatar_ghoPlrvzBMngo7zpPFzEo?_a=BAMAMiWQ0",
+                "permalink": "https://app.daily.dev/mehdimoozeh"
+            },
+            "userState": {
+                "vote": 0
+            },
+            "children": [
+                {
+                    "id": "msRc7zcoG",
+                    "content": "@mehdimoozeh, I really appreciate the feedback and will try to avoid doing this in the near future.\nWill do the edits to that option right away, thank you for mentioning it",
+                    "contentHtml": "<p><a href=\"https://app.daily.dev/mehdimoozeh\" data-mention-id=\"ghoPlrvzBMngo7zpPFzEo\" data-mention-username=\"mehdimoozeh\" translate=\"no\">@mehdimoozeh</a>, I really appreciate the feedback and will try to avoid doing this in the near future.\nWill do the edits to that option right away, thank you for mentioning it</p>\n",
+                    "createdAt": "2026-05-21T13:44:05.138Z",
+                    "permalink": "https://app.daily.dev/posts/gGig3KA2F#c-msRc7zcoG",
+                    "numUpvotes": 1,
+                    "numAwards": 0,
+                    "author": {
+                        "id": "iaC4JsBU0lV8wBsc85fSh",
+                        "name": "Joud Awad",
+                        "username": "joudawad",
+                        "image": "https://media.daily.dev/image/upload/s--dOB9RaXY--/f_auto/v1773320801/avatars/avatar_iaC4JsBU0lV8wBsc85fSh?_a=BAMAMiiu0",
+                        "permalink": "https://app.daily.dev/joudawad"
+                    },
+                    "userState": {
+                        "vote": 0
+                    }
+                }
+            ]
+        },
+        {
+            "id": "g0o3FrP3S",
+            "content": "The **best option is C: RDS Proxy for Lambda + PgBouncer transaction mode for ECS REST API**. Here\u2019s why in detail.\n\n**C = RDS Proxy for Lambda + PgBouncer transaction mode for ECS REST API**\n\n### How it works\n\n1. **REST API (ECS Fargate)** \u2192 PgBouncer in **transaction mode**Short-lived requests can be multiplexed over fewer DB connections.Handles 800 RPS with 10 tasks \u00d7 40 pool without exceeding 300 backend connections.\n2. **Lambda functions** \u2192 **RDS Proxy**Designed for **bursty, short-lived connections** like Lambda cold starts.RDS Proxy **multiplexes many Lambda invocations over a smaller pool of DB connections**, so Lambda spikes don\u2019t overwhelm the database.\n3. **Background workers** \u2192 connect directly to the DB (or via a separate pooler if needed)They occupy long-running connections, but because Lambda and REST API are **multiplexed**, total DB connections stay under 300.\n\n### Why this avoids 3am fires\n\n- **Burst isolation:** RDS Proxy isolates Lambda bursts from both REST API and workers.\n- **Short-transaction efficiency:** PgBouncer handles REST API efficiently, preventing connection pile-up.\n- **Long-running worker safety:** Workers get dedicated connections; no multiplexing that can interrupt them.\n- **Connection count stays under RDS limit:** Total active backend connections \u2264 300 at all times.\n\nSummary**C is best because:****Respects connection limits** for all workloads.**Isolates bursts (Lambda)** without creating silent failures.**Handles short REST API transactions efficiently**.**Allows long-running analytics queries** without blocking other workloads.**Scalable and operationally safe** \u2014 fewer midnight pager alerts.",
+            "contentHtml": "<p>The <strong>best option is C: RDS Proxy for Lambda + PgBouncer transaction mode for ECS REST API</strong>. Here\u2019s why in detail.</p>\n<p><strong>C = RDS Proxy for Lambda + PgBouncer transaction mode for ECS REST API</strong></p>\n<h3>How it works</h3>\n<ol>\n<li><strong>REST API (ECS Fargate)</strong> \u2192 PgBouncer in <strong>transaction mode</strong>Short-lived requests can be multiplexed over fewer DB connections.Handles 800 RPS with 10 tasks \u00d7 40 pool without exceeding 300 backend connections.</li>\n<li><strong>Lambda functions</strong> \u2192 <strong>RDS Proxy</strong>Designed for <strong>bursty, short-lived connections</strong> like Lambda cold starts.RDS Proxy <strong>multiplexes many Lambda invocations over a smaller pool of DB connections</strong>, so Lambda spikes don\u2019t overwhelm the database.</li>\n<li><strong>Background workers</strong> \u2192 connect directly to the DB (or via a separate pooler if needed)They occupy long-running connections, but because Lambda and REST API are <strong>multiplexed</strong>, total DB connections stay under 300.</li>\n</ol>\n<h3>Why this avoids 3am fires</h3>\n<ul>\n<li><strong>Burst isolation:</strong> RDS Proxy isolates Lambda bursts from both REST API and workers.</li>\n<li><strong>Short-transaction efficiency:</strong> PgBouncer handles REST API efficiently, preventing connection pile-up.</li>\n<li><strong>Long-running worker safety:</strong> Workers get dedicated connections; no multiplexing that can interrupt them.</li>\n<li><strong>Connection count stays under RDS limit:</strong> Total active backend connections \u2264 300 at all times.</li>\n</ul>\n<p>Summary**C is best because:**<strong>Respects connection limits</strong> for all workloads.<strong>Isolates bursts (Lambda)</strong> without creating silent failures.<strong>Handles short REST API transactions efficiently</strong>.<strong>Allows long-running analytics queries</strong> without blocking other workloads.<strong>Scalable and operationally safe</strong> \u2014 fewer midnight pager alerts.</p>\n",
+            "createdAt": "2026-05-19T18:26:02.594Z",
+            "lastUpdatedAt": null,
+            "permalink": "https://app.daily.dev/posts/gGig3KA2F#c-g0o3FrP3S",
+            "numUpvotes": 2,
+            "numAwards": 0,
+            "author": {
+                "id": "lhgbujJ5fPnJwftLlAjCp",
+                "name": "JuanMateo",
+                "username": "juanmateo",
+                "image": null,
+                "permalink": "https://app.daily.dev/juanmateo"
+            },
+            "userState": {
+                "vote": 0
+            },
+            "children": [
+                {
+                    "id": "QcDEtsfM2",
+                    "content": "@juanmateo Solid argument, and thank you for sharing it, but please re-read option C carefully. C as written is \"RDS Proxy for Lambda + PgBouncer transaction mode for ECS.\" That's two of three workloads. The analytics workers are nowhere in it.\n\nYour reply quietly fixes this by adding \"workers connect directly to the DB (or via a separate pooler if needed).\" That's not C. That's a new option you wrote because C on its own leaves the hardest workload unaddressed. The whole question is about all three coexisting under max_connections = 300. Solving two and hand-waving the third isn't picking C, it's rewriting the question.\n\nOn the Lambda piece: RDS Proxy and PgBouncer transaction mode are doing the same job here. Both multiplex stateless short transactions across a smaller backend pool. RDS Proxy on Postgres pins on prepared statements, SET, temp tables, sequences \u2014 same constraints PgBouncer transaction mode has. There's no isolation magic from being a managed service. Routing Lambda through a second pool on the same PgBouncer instance gets you the same burst absorption without operating another piece of infrastructure.\n\nThe load-bearing decision in this question is the workers. 30\u201390s queries holding session state get destroyed by any transaction-mode pooler. B addresses that head-on with session mode for workers on the same PgBouncer instance, separate port. C as written doesn't address it at all.\n\nIf your version were \"RDS Proxy for Lambda + PgBouncer transaction mode for REST + PgBouncer session mode for workers\" \u2014 that's a defensible answer. It's also B with extra steps and a second control plane to babysit.",
+                    "contentHtml": "<p><a href=\"https://app.daily.dev/juanmateo\" data-mention-id=\"lhgbujJ5fPnJwftLlAjCp\" data-mention-username=\"juanmateo\" translate=\"no\">@juanmateo</a> Solid argument, and thank you for sharing it, but please re-read option C carefully. C as written is \u201cRDS Proxy for Lambda + PgBouncer transaction mode for ECS.\u201d That\u2019s two of three workloads. The analytics workers are nowhere in it.</p>\n<p>Your reply quietly fixes this by adding \u201cworkers connect directly to the DB (or via a separate pooler if needed).\u201d That\u2019s not C. That\u2019s a new option you wrote because C on its own leaves the hardest workload unaddressed. The whole question is about all three coexisting under max_connections = 300. Solving two and hand-waving the third isn\u2019t picking C, it\u2019s rewriting the question.</p>\n<p>On the Lambda piece: RDS Proxy and PgBouncer transaction mode are doing the same job here. Both multiplex stateless short transactions across a smaller backend pool. RDS Proxy on Postgres pins on prepared statements, SET, temp tables, sequences \u2014 same constraints PgBouncer transaction mode has. There\u2019s no isolation magic from being a managed service. Routing Lambda through a second pool on the same PgBouncer instance gets you the same burst absorption without operating another piece of infrastructure.</p>\n<p>The load-bearing decision in this question is the workers. 30\u201390s queries holding session state get destroyed by any transaction-mode pooler. B addresses that head-on with session mode for workers on the same PgBouncer instance, separate port. C as written doesn\u2019t address it at all.</p>\n<p>If your version were \u201cRDS Proxy for Lambda + PgBouncer transaction mode for REST + PgBouncer session mode for workers\u201d \u2014 that\u2019s a defensible answer. It\u2019s also B with extra steps and a second control plane to babysit.</p>\n",
+                    "createdAt": "2026-05-19T18:35:13.777Z",
+                    "permalink": "https://app.daily.dev/posts/gGig3KA2F#c-QcDEtsfM2",
+                    "numUpvotes": 0,
+                    "numAwards": 0,
+                    "author": {
+                        "id": "iaC4JsBU0lV8wBsc85fSh",
+                        "name": "Joud Awad",
+                        "username": "joudawad",
+                        "image": "https://media.daily.dev/image/upload/s--dOB9RaXY--/f_auto/v1773320801/avatars/avatar_iaC4JsBU0lV8wBsc85fSh?_a=BAMAMiiu0",
+                        "permalink": "https://app.daily.dev/joudawad"
+                    },
+                    "userState": {
+                        "vote": 0
+                    }
+                },
+                {
+                    "id": "84SRHLhFb",
+                    "content": "@joudawad Hello, thanks for this amazing serie \ud83d\udc4b cc @juanmateo I think I understand your point\n\nIn option B we are routing **RDS Proxy for Lambda + PgBouncer transaction mode for ECS REST API**.\n\nIt may not be the best solution since RDS Proxy is equivalent to PgBouncer, but it's defendable.\n\n\nNow considering the background workers, I think they will connect to directly to the db and hold connection **by default **(if not, how would they conect?)-** ** and that would solve the problem.\n\nWdyt? \ud83e\udd14",
+                    "contentHtml": "<p><a href=\"https://app.daily.dev/joudawad\" data-mention-id=\"iaC4JsBU0lV8wBsc85fSh\" data-mention-username=\"joudawad\" translate=\"no\">@joudawad</a> Hello, thanks for this amazing serie \ud83d\udc4b cc <a href=\"https://app.daily.dev/juanmateo\" data-mention-id=\"lhgbujJ5fPnJwftLlAjCp\" data-mention-username=\"juanmateo\" translate=\"no\">@juanmateo</a> I think I understand your point</p>\n<p>In option B we are routing <strong>RDS Proxy for Lambda + PgBouncer transaction mode for ECS REST API</strong>.</p>\n<p>It may not be the best solution since RDS Proxy is equivalent to PgBouncer, but it\u2019s defendable.</p>\n<p>Now considering the background workers, I think they will connect to directly to the db and hold connection **by default <strong>(if not, how would they conect?)-</strong> ** and that would solve the problem.</p>\n<p>Wdyt? \ud83e\udd14</p>\n",
+                    "createdAt": "2026-05-22T10:11:29.686Z",
+                    "permalink": "https://app.daily.dev/posts/gGig3KA2F#c-84SRHLhFb",
+                    "numUpvotes": 2,
+                    "numAwards": 0,
+                    "author": {
+                        "id": "AICbSiY7y3Q5RLGJj7ht8",
+                        "name": "Papa Alioune Tour\u00e9",
+                        "username": "papaaliounetoure",
+                        "image": "https://lh3.googleusercontent.com/a/ACg8ocLWg2IffeEOZ5adb8jSEBgsBoerDXVo8AVGO-LrmSGn9n23xWY=s96-c",
+                        "permalink": "https://app.daily.dev/papaaliounetoure"
+                    },
+                    "userState": {
+                        "vote": 0
+                    }
+                },
+                {
+                    "id": "5q8s1ApcV",
+                    "content": "@papaaliounetoure Thank you so much for your support and it really means a lot to me \ud83d\ude4f \u2014 let me untangle two things, because I think the option labels got crossed in the thread and it changes the answer.\n\nWhat you described \u2014 \"RDS Proxy for Lambda + PgBouncer transaction mode for ECS REST API\" \u2014 that's option C, not B. B has no RDS Proxy in it at all. B is: one PgBouncer instance, two pool configs \u2014 transaction mode on one port for the REST API (Lambda goes through that one too), session mode on a separate port for the workers. Same PgBouncer process, two listening ports, two `[databases]` entries in `pgbouncer.ini`. Easy to miss because juanmateo's reply framed C in a way that made it sound like the full solution.\n\nOn \"workers connect directly to the DB by default and that solves the problem\" \u2014 it doesn't, for two reasons.\n\nFirst, the math. `max_connections = 300`. If Lambda goes through RDS Proxy (multiplexed, fine) and the REST API goes through PgBouncer transaction mode (multiplexed, fine), those two are handled. But workers connecting directly hold one backend connection each for 30\u201390 seconds with zero multiplexing. Those come straight off the 300 budget. Add a Lambda burst at 200 concurrent and an 800 RPS API and the budget is already squeezed before the workers get their share. Direct connections don't respect the cap, they just move where it breaks.\n\nSecond, \"by default\" isn't really a design choice \u2014 it's the absence of one. Any Postgres client opens a TCP connection if you don't put a pooler in front of it. With a direct connection there's no `pool_size` cap, no `server_idle_timeout`, no central place to kill a stuck query, no shared view of how close you are to the 300 ceiling. First time someone ships a worker with a query that doesn't release cleanly, it chews through connections until Postgres starts rejecting logins on every workload \u2014 including the REST API. That's exactly the 3am scenario the question is built around.\n\nWhat PgBouncer session mode gives the workers is the same thing a direct connection would \u2014 one client connection pinned to one backend for the whole session, so temp tables, `SET search_path`, cursors, advisory locks all survive \u2014 but with a `pool_size` cap, idle timeouts, and one place to look when something goes sideways. Functionally close to direct, but bounded.\n\nSo the workers piece in B isn't \"they connect directly, problem solved.\" It's \"they go through a session-mode pool that behaves like a direct connection but with a leash on it.\"\n\n\nI hope this clears it for you. Please let me know so I can try to explain more!",
+                    "contentHtml": "<p><a href=\"https://app.daily.dev/papaaliounetoure\" data-mention-id=\"AICbSiY7y3Q5RLGJj7ht8\" data-mention-username=\"papaaliounetoure\" translate=\"no\">@papaaliounetoure</a> Thank you so much for your support and it really means a lot to me \ud83d\ude4f \u2014 let me untangle two things, because I think the option labels got crossed in the thread and it changes the answer.</p>\n<p>What you described \u2014 \u201cRDS Proxy for Lambda + PgBouncer transaction mode for ECS REST API\u201d \u2014 that\u2019s option C, not B. B has no RDS Proxy in it at all. B is: one PgBouncer instance, two pool configs \u2014 transaction mode on one port for the REST API (Lambda goes through that one too), session mode on a separate port for the workers. Same PgBouncer process, two listening ports, two <code>[databases]</code> entries in <code>pgbouncer.ini</code>. Easy to miss because juanmateo\u2019s reply framed C in a way that made it sound like the full solution.</p>\n<p>On \u201cworkers connect directly to the DB by default and that solves the problem\u201d \u2014 it doesn\u2019t, for two reasons.</p>\n<p>First, the math. <code>max_connections = 300</code>. If Lambda goes through RDS Proxy (multiplexed, fine) and the REST API goes through PgBouncer transaction mode (multiplexed, fine), those two are handled. But workers connecting directly hold one backend connection each for 30\u201390 seconds with zero multiplexing. Those come straight off the 300 budget. Add a Lambda burst at 200 concurrent and an 800 RPS API and the budget is already squeezed before the workers get their share. Direct connections don\u2019t respect the cap, they just move where it breaks.</p>\n<p>Second, \u201cby default\u201d isn\u2019t really a design choice \u2014 it\u2019s the absence of one. Any Postgres client opens a TCP connection if you don\u2019t put a pooler in front of it. With a direct connection there\u2019s no <code>pool_size</code> cap, no <code>server_idle_timeout</code>, no central place to kill a stuck query, no shared view of how close you are to the 300 ceiling. First time someone ships a worker with a query that doesn\u2019t release cleanly, it chews through connections until Postgres starts rejecting logins on every workload \u2014 including the REST API. That\u2019s exactly the 3am scenario the question is built around.</p>\n<p>What PgBouncer session mode gives the workers is the same thing a direct connection would \u2014 one client connection pinned to one backend for the whole session, so temp tables, <code>SET search_path</code>, cursors, advisory locks all survive \u2014 but with a <code>pool_size</code> cap, idle timeouts, and one place to look when something goes sideways. Functionally close to direct, but bounded.</p>\n<p>So the workers piece in B isn\u2019t \u201cthey connect directly, problem solved.\u201d It\u2019s \u201cthey go through a session-mode pool that behaves like a direct connection but with a leash on it.\u201d</p>\n<p>I hope this clears it for you. Please let me know so I can try to explain more!</p>\n",
+                    "createdAt": "2026-05-22T10:39:31.033Z",
+                    "permalink": "https://app.daily.dev/posts/gGig3KA2F#c-5q8s1ApcV",
+                    "numUpvotes": 1,
+                    "numAwards": 0,
+                    "author": {
+                        "id": "iaC4JsBU0lV8wBsc85fSh",
+                        "name": "Joud Awad",
+                        "username": "joudawad",
+                        "image": "https://media.daily.dev/image/upload/s--dOB9RaXY--/f_auto/v1773320801/avatars/avatar_iaC4JsBU0lV8wBsc85fSh?_a=BAMAMiiu0",
+                        "permalink": "https://app.daily.dev/joudawad"
+                    },
+                    "userState": {
+                        "vote": 0
+                    }
+                },
+                {
+                    "id": "a2eP62zBy",
+                    "content": "@joudawad  Thanks for the explanation, it's very clear! That subtlety about the direct connection was exactly what got me wrong.\n\nI totally mixed up B and C, and your point about giving the workers a \"leash\" via the session-mode pool makes perfect sense now. Connecting them directly without a cap or a timeout would definitely be a ticking time bomb at that scale.\n\nThanks for untangling this, keep these posts coming! \ud83d\ude80",
+                    "contentHtml": "<p><a href=\"https://app.daily.dev/joudawad\" data-mention-id=\"iaC4JsBU0lV8wBsc85fSh\" data-mention-username=\"joudawad\" translate=\"no\">@joudawad</a>  Thanks for the explanation, it\u2019s very clear! That subtlety about the direct connection was exactly what got me wrong.</p>\n<p>I totally mixed up B and C, and your point about giving the workers a \u201cleash\u201d via the session-mode pool makes perfect sense now. Connecting them directly without a cap or a timeout would definitely be a ticking time bomb at that scale.</p>\n<p>Thanks for untangling this, keep these posts coming! \ud83d\ude80</p>\n",
+                    "createdAt": "2026-05-22T10:53:51.953Z",
+                    "permalink": "https://app.daily.dev/posts/gGig3KA2F#c-a2eP62zBy",
+                    "numUpvotes": 1,
+                    "numAwards": 0,
+                    "author": {
+                        "id": "AICbSiY7y3Q5RLGJj7ht8",
+                        "name": "Papa Alioune Tour\u00e9",
+                        "username": "papaaliounetoure",
+                        "image": "https://lh3.googleusercontent.com/a/ACg8ocLWg2IffeEOZ5adb8jSEBgsBoerDXVo8AVGO-LrmSGn9n23xWY=s96-c",
+                        "permalink": "https://app.daily.dev/papaaliounetoure"
+                    },
+                    "userState": {
+                        "vote": 0
+                    }
+                }
+            ]
+        },
+        {
+            "id": "ZY5FM576w",
+            "content": "Hats Off for being consistent!",
+            "contentHtml": "<p>Hats Off for being consistent!</p>\n",
+            "createdAt": "2026-05-19T14:01:27.000Z",
+            "lastUpdatedAt": null,
+            "permalink": "https://app.daily.dev/posts/gGig3KA2F#c-ZY5FM576w",
+            "numUpvotes": 4,
+            "numAwards": 0,
+            "author": {
+                "id": "VqsDuiiXz6AnTS1eKLMWz",
+                "name": "Khishamuddin Syed",
+                "username": "webkmsyed",
+                "image": "https://media.daily.dev/image/upload/s--xXLX9Wi9--/f_auto/v1777551874/avatars/avatar_VqsDuiiXz6AnTS1eKLMWz?_a=BAMAMiWQ0",
+                "permalink": "https://app.daily.dev/webkmsyed"
+            },
+            "userState": {
+                "vote": 0
+            },
+            "children": [
+                {
+                    "id": "ItXNjlNUn",
+                    "content": "@webkmsyed, I really appreciate your support and feedback. Thank you so so much \ud83d\ude4f \nDay 14 dropping in 10 minutes, so stay tuned",
+                    "contentHtml": "<p><a href=\"https://app.daily.dev/webkmsyed\" data-mention-id=\"VqsDuiiXz6AnTS1eKLMWz\" data-mention-username=\"webkmsyed\" translate=\"no\">@webkmsyed</a>, I really appreciate your support and feedback. Thank you so so much \ud83d\ude4f\nDay 14 dropping in 10 minutes, so stay tuned</p>\n",
+                    "createdAt": "2026-05-19T16:11:43.401Z",
+                    "permalink": "https://app.daily.dev/posts/gGig3KA2F#c-ItXNjlNUn",
+                    "numUpvotes": 1,
+                    "numAwards": 0,
+                    "author": {
+                        "id": "iaC4JsBU0lV8wBsc85fSh",
+                        "name": "Joud Awad",
+                        "username": "joudawad",
+                        "image": "https://media.daily.dev/image/upload/s--dOB9RaXY--/f_auto/v1773320801/avatars/avatar_iaC4JsBU0lV8wBsc85fSh?_a=BAMAMiiu0",
+                        "permalink": "https://app.daily.dev/joudawad"
+                    },
+                    "userState": {
+                        "vote": 0
+                    }
+                }
+            ]
+        },
+        {
+            "id": "3Yxbg6cf3",
+            "content": "Also, it would mean a lot to me if you could support my content and stay in touch \ud83d\ude4f\n\n- YouTube: [https://www.youtube.com/@system-design-lab](https://www.youtube.com/@system-design-lab)\n- LinkedIn: [https://www.linkedin.com/in/joud-awad/](https://www.linkedin.com/in/joud-awad/)\n- Medium Blog: [https://joudwawad.medium.com/](https://joudwawad.medium.com/)\n- Substack: [https://joudawad.substack.com/](https://joudawad.substack.com/)",
+            "contentHtml": "<p>Also, it would mean a lot to me if you could support my content and stay in touch \ud83d\ude4f</p>\n<ul>\n<li>YouTube: <a href=\"https://www.youtube.com/@system-design-lab\" target=\"_blank\" rel=\"noopener nofollow\">https://www.youtube.com/@system-design-lab</a></li>\n<li>LinkedIn: <a href=\"https://www.linkedin.com/in/joud-awad/\" target=\"_blank\" rel=\"noopener nofollow\">https://www.linkedin.com/in/joud-awad/</a></li>\n<li>Medium Blog: <a href=\"https://joudwawad.medium.com/\" target=\"_blank\" rel=\"noopener nofollow\">https://joudwawad.medium.com/</a></li>\n<li>Substack: <a href=\"https://joudawad.substack.com/\" target=\"_blank\" rel=\"noopener nofollow\">https://joudawad.substack.com/</a></li>\n</ul>\n",
+            "createdAt": "2026-05-18T16:50:01.294Z",
+            "lastUpdatedAt": null,
+            "permalink": "https://app.daily.dev/posts/gGig3KA2F#c-3Yxbg6cf3",
+            "numUpvotes": 3,
+            "numAwards": 0,
+            "author": {
+                "id": "iaC4JsBU0lV8wBsc85fSh",
+                "name": "Joud Awad",
+                "username": "joudawad",
+                "image": "https://media.daily.dev/image/upload/s--dOB9RaXY--/f_auto/v1773320801/avatars/avatar_iaC4JsBU0lV8wBsc85fSh?_a=BAMAMiiu0",
+                "permalink": "https://app.daily.dev/joudawad"
+            },
+            "userState": {
+                "vote": 0
+            },
+            "children": []
+        },
+        {
+            "id": "FWVCCzcl7",
+            "content": "**Why D is the senior-engineer trap (read replica for workers):**\n\n\nThis is the option that fools experienced engineers, because it pattern-matches to \"isolate the workload.\" And isolating analytics from OLTP at the DB level is genuinely a great idea \u2014 for a _different_ problem.\n\n\nD solves **read scaling** and **noisy neighbor on query plans / cache / IO**. It does **not** solve the connection math. Your read replica still has its own max_connections ceiling. Your workers still hold connections for 30\u201390 seconds. You've just moved the connection exhaustion problem from the primary to the replica \u2014 and now you're paying for an extra RDS instance.\n\n\nIf the problem statement was \"analytics queries are starving the OLTP workload,\" D would be right. The problem statement is \"we don't have enough connections.\" Different pain. Different pattern.\n\n\nD is what you do _after_ you have B working and you realize analytics is also competing for IOPS and buffer cache.",
+            "contentHtml": "<p><strong>Why D is the senior-engineer trap (read replica for workers):</strong></p>\n<p>This is the option that fools experienced engineers, because it pattern-matches to \u201cisolate the workload.\u201d And isolating analytics from OLTP at the DB level is genuinely a great idea \u2014 for a <em>different</em> problem.</p>\n<p>D solves <strong>read scaling</strong> and <strong>noisy neighbor on query plans / cache / IO</strong>. It does <strong>not</strong> solve the connection math. Your read replica still has its own max_connections ceiling. Your workers still hold connections for 30\u201390 seconds. You\u2019ve just moved the connection exhaustion problem from the primary to the replica \u2014 and now you\u2019re paying for an extra RDS instance.</p>\n<p>If the problem statement was \u201canalytics queries are starving the OLTP workload,\u201d D would be right. The problem statement is \u201cwe don\u2019t have enough connections.\u201d Different pain. Different pattern.</p>\n<p>D is what you do <em>after</em> you have B working and you realize analytics is also competing for IOPS and buffer cache.</p>\n",
+            "createdAt": "2026-05-18T16:49:48.521Z",
+            "lastUpdatedAt": null,
+            "permalink": "https://app.daily.dev/posts/gGig3KA2F#c-FWVCCzcl7",
+            "numUpvotes": 7,
+            "numAwards": 0,
+            "author": {
+                "id": "iaC4JsBU0lV8wBsc85fSh",
+                "name": "Joud Awad",
+                "username": "joudawad",
+                "image": "https://media.daily.dev/image/upload/s--dOB9RaXY--/f_auto/v1773320801/avatars/avatar_iaC4JsBU0lV8wBsc85fSh?_a=BAMAMiiu0",
+                "permalink": "https://app.daily.dev/joudawad"
+            },
+            "userState": {
+                "vote": 0
+            },
+            "children": []
+        },
+        {
+            "id": "BMYjHzKld",
+            "content": "**Why C is wrong (RDS Proxy for Lambda + PgBouncer for ECS):**\n\n\nDefensible on paper. RDS Proxy is genuinely good for Lambda \u2014 it handles the cold-start connection storm, manages IAM auth, integrates with the VPC. If the question were just \"Lambda + Postgres,\" C is right.\n\n\nBut C doesn't fix the workers. They're still long-running, they still need session state, and you've now introduced a second pooling product to operate, monitor, and pay for. RDS Proxy is also _more expensive than PgBouncer_ per connection-hour, and it doesn't support session pinning across transactions the way session-mode PgBouncer does.\n\n\nC solves the easiest of the three problems and leaves the hardest one untouched.",
+            "contentHtml": "<p><strong>Why C is wrong (RDS Proxy for Lambda + PgBouncer for ECS):</strong></p>\n<p>Defensible on paper. RDS Proxy is genuinely good for Lambda \u2014 it handles the cold-start connection storm, manages IAM auth, integrates with the VPC. If the question were just \u201cLambda + Postgres,\u201d C is right.</p>\n<p>But C doesn\u2019t fix the workers. They\u2019re still long-running, they still need session state, and you\u2019ve now introduced a second pooling product to operate, monitor, and pay for. RDS Proxy is also <em>more expensive than PgBouncer</em> per connection-hour, and it doesn\u2019t support session pinning across transactions the way session-mode PgBouncer does.</p>\n<p>C solves the easiest of the three problems and leaves the hardest one untouched.</p>\n",
+            "createdAt": "2026-05-18T16:49:43.177Z",
+            "lastUpdatedAt": null,
+            "permalink": "https://app.daily.dev/posts/gGig3KA2F#c-BMYjHzKld",
+            "numUpvotes": 7,
+            "numAwards": 0,
+            "author": {
+                "id": "iaC4JsBU0lV8wBsc85fSh",
+                "name": "Joud Awad",
+                "username": "joudawad",
+                "image": "https://media.daily.dev/image/upload/s--dOB9RaXY--/f_auto/v1773320801/avatars/avatar_iaC4JsBU0lV8wBsc85fSh?_a=BAMAMiiu0",
+                "permalink": "https://app.daily.dev/joudawad"
+            },
+            "userState": {
+                "vote": 0
+            },
+            "children": []
+        },
+        {
+            "id": "vnJsycPhh",
+            "content": "...**Why A is the trap (PgBouncer transaction mode for everyone):**\n\n\nThis is the answer most engineers reach for because \"transaction mode = best multiplexing.\" It works beautifully for the API. It silently destroys the workers.\n\n\nThe moment an analytics query needs anything that doesn't fit in one transaction \u2014 a temp table, a session variable, a SET LOCAL, a prepared statement, a cursor that outlives a transaction \u2014 PgBouncer hands the connection back to the pool. Next query? Different backend connection. State gone. Query fails or worse, returns wrong results.\n\n\nThe failure mode is the cruelest kind: it works in dev (low concurrency, same connection by luck), it works in staging (light load), it dies in prod when the API is hammering the pool and the workers can't get a stable connection. You'll find this at 3am during a financial close.",
+            "contentHtml": "<p>\u2026<strong>Why A is the trap (PgBouncer transaction mode for everyone):</strong></p>\n<p>This is the answer most engineers reach for because \u201ctransaction mode = best multiplexing.\u201d It works beautifully for the API. It silently destroys the workers.</p>\n<p>The moment an analytics query needs anything that doesn\u2019t fit in one transaction \u2014 a temp table, a session variable, a SET LOCAL, a prepared statement, a cursor that outlives a transaction \u2014 PgBouncer hands the connection back to the pool. Next query? Different backend connection. State gone. Query fails or worse, returns wrong results.</p>\n<p>The failure mode is the cruelest kind: it works in dev (low concurrency, same connection by luck), it works in staging (light load), it dies in prod when the API is hammering the pool and the workers can\u2019t get a stable connection. You\u2019ll find this at 3am during a financial close.</p>\n",
+            "createdAt": "2026-05-18T16:49:35.941Z",
+            "lastUpdatedAt": "2026-05-18T19:30:32.505Z",
+            "permalink": "https://app.daily.dev/posts/gGig3KA2F#c-vnJsycPhh",
+            "numUpvotes": 6,
+            "numAwards": 0,
+            "author": {
+                "id": "iaC4JsBU0lV8wBsc85fSh",
+                "name": "Joud Awad",
+                "username": "joudawad",
+                "image": "https://media.daily.dev/image/upload/s--dOB9RaXY--/f_auto/v1773320801/avatars/avatar_iaC4JsBU0lV8wBsc85fSh?_a=BAMAMiiu0",
+                "permalink": "https://app.daily.dev/joudawad"
+            },
+            "userState": {
+                "vote": 0
+            },
+            "children": []
+        },
+        {
+            "id": "p6B5bsLBX",
+            "content": "Answer: B \u2014 PgBouncer session mode for workers + transaction mode for REST API \u2705\n\n\nThis one separates engineers who've actually run PgBouncer in prod from ones who've only read the docs. Here's the breakdown:\n\n\n**Why B wins (split pooler config by workload type):**\n\n\nThe whole point of PgBouncer is multiplexing \u2014 one backend Postgres connection serves many client connections, but **only when it's safe to hand the connection back between transactions**. That's transaction mode.\n\n\nTransaction mode is _perfect_ for the NestJS REST API: short transactions, 800 RPS, no session state, no SET LOCAL, no advisory locks held across queries, no prepared statements that need to survive. The REST API's 400 requested client connections collapse down to ~30\u201350 actual backend connections to Postgres. Math suddenly maths.\n\n\nTransaction mode is _catastrophic_ for the analytics workers. Their queries run 30\u201390 seconds and span multiple transactions \u2014 some hold session state, some use temp tables, some use SET search_path, some use cursors. Hand the connection back between transactions and that state is gone. Worse: at 800 RPS from the API side, the worker's chance of getting the _same_ backend connection back on the next transaction is basically zero. The worker silently breaks.\n\n\nSo you give the workers their own PgBouncer pool in **session mode** \u2014 one client connection = one backend connection for the whole session. They get fewer connections, but they hold them, which is what they actually need.\n\n\nThe Lambda traffic goes through the REST API's transaction-mode pool (it's stateless, short-lived \u2014 same shape as the API). One pooler instance, two pool configs, two listening ports. PgBouncer supports this natively.\n\n\nEnd state: API gets multiplexing, workers don't starve, total backend connections to Postgres stay under 300, nobody breaks. That's the boring correct answer that wins on call.\n\n\n![ChatGPT Image May 18, 2026, 07_42_52 PM.png](https://media.daily.dev/image/upload/s--2Az5EOg6--/f_auto/v1779122964/ugc/content_4e0cd702-9080-4b9e-81a3-9b9f773d1649?_a=BAMAMiWQ0)",
+            "contentHtml": "<p>Answer: B \u2014 PgBouncer session mode for workers + transaction mode for REST API \u2705</p>\n<p>This one separates engineers who\u2019ve actually run PgBouncer in prod from ones who\u2019ve only read the docs. Here\u2019s the breakdown:</p>\n<p><strong>Why B wins (split pooler config by workload type):</strong></p>\n<p>The whole point of PgBouncer is multiplexing \u2014 one backend Postgres connection serves many client connections, but <strong>only when it\u2019s safe to hand the connection back between transactions</strong>. That\u2019s transaction mode.</p>\n<p>Transaction mode is <em>perfect</em> for the NestJS REST API: short transactions, 800 RPS, no session state, no SET LOCAL, no advisory locks held across queries, no prepared statements that need to survive. The REST API\u2019s 400 requested client connections collapse down to ~30\u201350 actual backend connections to Postgres. Math suddenly maths.</p>\n<p>Transaction mode is <em>catastrophic</em> for the analytics workers. Their queries run 30\u201390 seconds and span multiple transactions \u2014 some hold session state, some use temp tables, some use SET search_path, some use cursors. Hand the connection back between transactions and that state is gone. Worse: at 800 RPS from the API side, the worker\u2019s chance of getting the <em>same</em> backend connection back on the next transaction is basically zero. The worker silently breaks.</p>\n<p>So you give the workers their own PgBouncer pool in <strong>session mode</strong> \u2014 one client connection = one backend connection for the whole session. They get fewer connections, but they hold them, which is what they actually need.</p>\n<p>The Lambda traffic goes through the REST API\u2019s transaction-mode pool (it\u2019s stateless, short-lived \u2014 same shape as the API). One pooler instance, two pool configs, two listening ports. PgBouncer supports this natively.</p>\n<p>End state: API gets multiplexing, workers don\u2019t starve, total backend connections to Postgres stay under 300, nobody breaks. That\u2019s the boring correct answer that wins on call.</p>\n<p><img src=\"https://media.daily.dev/image/upload/s--2Az5EOg6--/f_auto/v1779122964/ugc/content_4e0cd702-9080-4b9e-81a3-9b9f773d1649?_a=BAMAMiWQ0\" alt=\"ChatGPT Image May 18, 2026, 07_42_52 PM.png\"></p>\n",
+            "createdAt": "2026-05-18T16:49:28.508Z",
+            "lastUpdatedAt": null,
+            "permalink": "https://app.daily.dev/posts/gGig3KA2F#c-p6B5bsLBX",
+            "numUpvotes": 9,
+            "numAwards": 0,
+            "author": {
+                "id": "iaC4JsBU0lV8wBsc85fSh",
+                "name": "Joud Awad",
+                "username": "joudawad",
+                "image": "https://media.daily.dev/image/upload/s--dOB9RaXY--/f_auto/v1773320801/avatars/avatar_iaC4JsBU0lV8wBsc85fSh?_a=BAMAMiiu0",
+                "permalink": "https://app.daily.dev/joudawad"
+            },
+            "userState": {
+                "vote": 0
+            },
+            "children": []
+        }
+    ],
+    "pagination": {
+        "hasNextPage": false,
+        "cursor": "dGltZToxNzc5MTIyOTY4NTA4"
+    }
+}

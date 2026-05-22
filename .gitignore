@@ -1,0 +1,22 @@
+# Local Claude Code permissions — contains tokens, never commit
+.claude/settings.local.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+.python-version
+
+# Node
+node_modules/
+frontend/dist/
+*.log
+.DS_Store
+
+# Env files
+.env
+.env.local
+.env.*.local

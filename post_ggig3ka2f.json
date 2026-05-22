@@ -1,0 +1,38 @@
+{
+    "data": {
+        "id": "gGig3KA2F",
+        "title": "13/30 Days System Design Questions!",
+        "url": null,
+        "image": "https://media.daily.dev/image/upload/s--rII5L_Pn--/f_auto/v1779122927/posts/gGig3KA2F?_a=BAMAMiWQ0",
+        "summary": "A system design challenge exploring connection pool management when three different workloads (NestJS REST API, background analytics workers, and Lambda functions) compete for 300 max connections on a single Postgres RDS instance. Four architectural options are presented: PgBouncer transaction mode for all, split session/transaction mode by workload, hybrid RDS Proxy + PgBouncer, or offloading analytics to a read replica. One option silently breaks a workload under load \u2014 readers are challenged to identify which and explain why.",
+        "type": "freeform",
+        "publishedAt": null,
+        "createdAt": "2026-05-18T16:48:26.765Z",
+        "commentsPermalink": "https://app.daily.dev/posts/13-30-days-system-design-questions--ggig3ka2f",
+        "source": {
+            "id": "iaC4JsBU0lV8wBsc85fSh",
+            "name": "Joud Awad",
+            "handle": "iac4jsbu0lv8wbsc85fsh",
+            "image": "https://media.daily.dev/image/upload/s--dOB9RaXY--/f_auto/v1773320801/avatars/avatar_iaC4JsBU0lV8wBsc85fSh?_a=BAMAMiiu0"
+        },
+        "author": {
+            "id": "iaC4JsBU0lV8wBsc85fSh",
+            "name": "Joud Awad",
+            "image": "https://media.daily.dev/image/upload/s--dOB9RaXY--/f_auto/v1773320801/avatars/avatar_iaC4JsBU0lV8wBsc85fSh?_a=BAMAMiiu0",
+            "username": "joudawad"
+        },
+        "tags": [
+            "career",
+            "postgresql",
+            "aws-rds"
+        ],
+        "readTime": 2,
+        "numUpvotes": 87,
+        "numComments": 14,
+        "bookmarked": true,
+        "content": "You're running 3 workloads against the same Postgres RDS instance. max_connections = 300. They all need a connection pool. None of them want to share.\n\n\nHere's the setup:\n\n\n\u2192 NestJS REST API on ECS Fargate. Short transactions, 800 RPS, 10 tasks \u00d7 40 pool = **400 connections requested**.\n\n\u2192 Background job workers. Long-running analytics queries. Hold a connection for **30\u201390 seconds** each.\n\n\u2192 Lambda functions. Bursty, cold-start heavy, **0\u2013200 concurrent invocations**.\n\n\nThree clients. One database. 300 max connections. Math doesn't math.\n\n\nYou need to pool without breaking any of them. Pick your poison:\n\n\nA) **PgBouncer transaction mode for everyone**: single pooler in front of RDS, maximum multiplexing.\n\n\nB) **PgBouncer session mode for the workers + transaction mode for the REST API**: split pooler config by workload type. Lambda goes through one of them.\n\n\nC) **RDS Proxy for Lambda + PgBouncer transaction mode for ECS**: hybrid. Route by client type.\n\n\nD) **Separate read replica for the analytics workers + PgBouncer transaction mode for REST + Lambda**: isolate the workload at the DB level.\n\n\nThree of these will survive the on-call rotation. One of them silently breaks a workload at 3am and you'll spend a week figuring out why.\n\n\nThis isn't the \"PgBouncer obviously\" question. Every option here has a senior engineer who will defend it on a whiteboard \u2014 and one of them is wrong in a way that doesn't show up until the workers start dropping mid-query.\n\n\nPick one (A, B, C, or D) and tell me why. Full breakdown in the comments.\n\n\nIf your team has had the \"we're out of Postgres connections\" fire drill, share this with them. The argument in the thread is the lesson.\n\n\nDrop your answer \ud83d\udc47\n\n\n#30DaysOfSystemDesign #Day13 #Postgres #DatabaseArchitecture",
+        "userState": {
+            "vote": 0
+        }
+    }
+}

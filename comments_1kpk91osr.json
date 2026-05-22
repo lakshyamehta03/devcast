@@ -1,0 +1,239 @@
+{
+    "data": [
+        {
+            "id": "AVN2nUfLL",
+            "content": "I feel the same way about what you wrote in your article. I want to be clear: I am not against AI. I use it myself, and I do believe it can be extremely useful when applied properly. The real problem, in my opinion, is the way people are using it and the way they are glorifying it as if it were some kind of magic solution. Here are some things I have observed at my company, along with a few stories shared by friends from their companies.\n\n**BODs and managers are getting FOMO from what people share on social media about how cool, excellent, and awesome AI can be.**\n\nBut they often do not understand the hidden costs behind it: token-based billing, the time spent making AI actually work well for a specific workflow, and the effort needed to integrate it properly. These two parts are usually the most expensive and the hardest. Honestly, it makes me feel burned out.\n\n**People believe whatever AI tells them without questioning it.**\n\nI have seen my colleagues do things like this:\n\n- Paste someone else\u2019s comment into AI to get a response, then copy and paste the AI-generated answer back into the thread. Are we just message brokers for AI now? What the heck is happening?\n- Use vibe-coding tools, feel extremely proud of what they built, and share it with the whole company. But when I checked it, it did not even work properly. Lol.\n\n**Time and deadline pressure are getting worse.**\n\nBosses and clients now often start with: \u201cAI could do this in a few hours, so why does it cost so much?\u201d\n\nOkay then, if AI can do it in a few hours, who is going to review and test it? Who is going to make sure the AI designed the software the right way? Who is going to evaluate all the trade-offs?\n\nThere are many aspects that a good software engineer has to consider before delivering a product.",
+            "contentHtml": "<p>I feel the same way about what you wrote in your article. I want to be clear: I am not against AI. I use it myself, and I do believe it can be extremely useful when applied properly. The real problem, in my opinion, is the way people are using it and the way they are glorifying it as if it were some kind of magic solution. Here are some things I have observed at my company, along with a few stories shared by friends from their companies.</p>\n<p><strong>BODs and managers are getting FOMO from what people share on social media about how cool, excellent, and awesome AI can be.</strong></p>\n<p>But they often do not understand the hidden costs behind it: token-based billing, the time spent making AI actually work well for a specific workflow, and the effort needed to integrate it properly. These two parts are usually the most expensive and the hardest. Honestly, it makes me feel burned out.</p>\n<p><strong>People believe whatever AI tells them without questioning it.</strong></p>\n<p>I have seen my colleagues do things like this:</p>\n<ul>\n<li>Paste someone else\u2019s comment into AI to get a response, then copy and paste the AI-generated answer back into the thread. Are we just message brokers for AI now? What the heck is happening?</li>\n<li>Use vibe-coding tools, feel extremely proud of what they built, and share it with the whole company. But when I checked it, it did not even work properly. Lol.</li>\n</ul>\n<p><strong>Time and deadline pressure are getting worse.</strong></p>\n<p>Bosses and clients now often start with: \u201cAI could do this in a few hours, so why does it cost so much?\u201d</p>\n<p>Okay then, if AI can do it in a few hours, who is going to review and test it? Who is going to make sure the AI designed the software the right way? Who is going to evaluate all the trade-offs?</p>\n<p>There are many aspects that a good software engineer has to consider before delivering a product.</p>\n",
+            "createdAt": "2026-05-22T04:39:06.893Z",
+            "lastUpdatedAt": null,
+            "permalink": "https://app.daily.dev/posts/1kpk91osr#c-AVN2nUfLL",
+            "numUpvotes": 0,
+            "numAwards": 0,
+            "author": {
+                "id": "05h8ehMT5",
+                "name": "Felix",
+                "username": "felixdotgo",
+                "image": "https://avatars2.githubusercontent.com/u/7524676?v=4",
+                "permalink": "https://app.daily.dev/felixdotgo"
+            },
+            "userState": {
+                "vote": 0
+            },
+            "children": []
+        },
+        {
+            "id": "z8hXZF1uy",
+            "content": "I say, continue to call yourself whatever your merit deserves. Don't give in to these ridiculous labels, and refuse to work for a company that engages in this BS. Yeah it'll hurt, but remember, ther plan is that they're going to replace with AI anyway. Make it hard for them in the short to mid-term.",
+            "contentHtml": "<p>I say, continue to call yourself whatever your merit deserves. Don\u2019t give in to these ridiculous labels, and refuse to work for a company that engages in this BS. Yeah it\u2019ll hurt, but remember, ther plan is that they\u2019re going to replace with AI anyway. Make it hard for them in the short to mid-term.</p>\n",
+            "createdAt": "2026-05-22T02:39:26.279Z",
+            "lastUpdatedAt": null,
+            "permalink": "https://app.daily.dev/posts/1kpk91osr#c-z8hXZF1uy",
+            "numUpvotes": 0,
+            "numAwards": 0,
+            "author": {
+                "id": "f7hSM63bNUnP9H781hfXe",
+                "name": "K5RTO",
+                "username": "k5rto",
+                "image": "https://avatars.githubusercontent.com/u/29823530?v=4",
+                "permalink": "https://app.daily.dev/k5rto"
+            },
+            "userState": {
+                "vote": 0
+            },
+            "children": []
+        },
+        {
+            "id": "Da4RGwGQj",
+            "content": "Love it...",
+            "contentHtml": "<p>Love it\u2026</p>\n",
+            "createdAt": "2026-05-21T14:35:54.793Z",
+            "lastUpdatedAt": null,
+            "permalink": "https://app.daily.dev/posts/1kpk91osr#c-Da4RGwGQj",
+            "numUpvotes": 1,
+            "numAwards": 0,
+            "author": {
+                "id": "6cjk8fqOnLBdAW4rD0WYh",
+                "name": "Julian Scott",
+                "username": "smartsea",
+                "image": "https://media.daily.dev/image/upload/s--5KoM91Md--/f_auto/v1779384794/avatars/avatar_6cjk8fqOnLBdAW4rD0WYh?_a=BAMAMiWQ0",
+                "permalink": "https://app.daily.dev/smartsea"
+            },
+            "userState": {
+                "vote": 0
+            },
+            "children": []
+        },
+        {
+            "id": "T1v1SrdZB",
+            "content": "I allways found it weird that people just change their own job titles as clothes. I feel a title should be attributed to you. I can claim I am a Software AI Genius Magician, or a King Developer ... you name it ... it makes no sense. Just as AI enabled Engineer makes no sense. Would an architect say he is a CAD enabled Engineer? No, because architect means way more.",
+            "contentHtml": "<p>I allways found it weird that people just change their own job titles as clothes. I feel a title should be attributed to you. I can claim I am a Software AI Genius Magician, or a King Developer \u2026 you name it \u2026 it makes no sense. Just as AI enabled Engineer makes no sense. Would an architect say he is a CAD enabled Engineer? No, because architect means way more.</p>\n",
+            "createdAt": "2026-05-21T07:03:11.177Z",
+            "lastUpdatedAt": null,
+            "permalink": "https://app.daily.dev/posts/1kpk91osr#c-T1v1SrdZB",
+            "numUpvotes": 0,
+            "numAwards": 0,
+            "author": {
+                "id": "Z0Y5lKjimjGDZtplRmL1r",
+                "name": "Grergor",
+                "username": "gresakg",
+                "image": "https://media.daily.dev/image/upload/s--Mh3EhDVj--/f_auto/v1762860597/avatars/avatar_Z0Y5lKjimjGDZtplRmL1r?_a=BAMAK+ZW0",
+                "permalink": "https://app.daily.dev/gresakg"
+            },
+            "userState": {
+                "vote": 0
+            },
+            "children": []
+        },
+        {
+            "id": "98bctGdgi",
+            "content": "Well said. Titles will keep changing with every new technology wave, but the fundamentals remain painfully consistent: build real skills, communicate clearly, create visible work, and develop strong relationships. \u201cAI-enabled\u201d sounds nice, but without depth, it is just another LinkedIn costume.",
+            "contentHtml": "<p>Well said. Titles will keep changing with every new technology wave, but the fundamentals remain painfully consistent: build real skills, communicate clearly, create visible work, and develop strong relationships. \u201cAI-enabled\u201d sounds nice, but without depth, it is just another LinkedIn costume.</p>\n",
+            "createdAt": "2026-05-21T05:35:55.161Z",
+            "lastUpdatedAt": null,
+            "permalink": "https://app.daily.dev/posts/1kpk91osr#c-98bctGdgi",
+            "numUpvotes": 0,
+            "numAwards": 0,
+            "author": {
+                "id": "31X8v4aef86WyygmnVrjC",
+                "name": "Sayan Mondal",
+                "username": "sayanmondal",
+                "image": "https://media.daily.dev/image/upload/s--cW6TLpb9--/f_auto/v1731954927/avatars/avatar_31X8v4aef86WyygmnVrjC",
+                "permalink": "https://app.daily.dev/sayanmondal"
+            },
+            "userState": {
+                "vote": 0
+            },
+            "children": []
+        },
+        {
+            "id": "4PzyPa86m",
+            "content": "Well Put Ibrahim.",
+            "contentHtml": "<p>Well Put Ibrahim.</p>\n",
+            "createdAt": "2026-05-21T01:24:14.668Z",
+            "lastUpdatedAt": null,
+            "permalink": "https://app.daily.dev/posts/1kpk91osr#c-4PzyPa86m",
+            "numUpvotes": 0,
+            "numAwards": 0,
+            "author": {
+                "id": "xsNumZ64mee2UItP7hPO6",
+                "name": "trikle mes",
+                "username": "triklemes",
+                "image": "https://lh3.googleusercontent.com/a/ACg8ocIFx_OWpXXbV2HAZeIlvDL8o0K17zHABDncUScsvFgInv8r=s96-c",
+                "permalink": "https://app.daily.dev/triklemes"
+            },
+            "userState": {
+                "vote": 0
+            },
+            "children": []
+        },
+        {
+            "id": "dWErBO6Cx",
+            "content": "while title is a way of positioning oneself to better opportunities no doubt, human connections is really the basics to getting even better edges over competitons, for instance let`s say a Doctor who earns a title has no one coming to him for treatments or medical advice and does not go to medical events to network with other professionals in his field. The likelihood of him having a greater advantage in his art becomes shortened.\n\nSo really any business or professionals should invest time to learn People ,market and their talents",
+            "contentHtml": "<p>while title is a way of positioning oneself to better opportunities no doubt, human connections is really the basics to getting even better edges over competitons, for instance let`s say a Doctor who earns a title has no one coming to him for treatments or medical advice and does not go to medical events to network with other professionals in his field. The likelihood of him having a greater advantage in his art becomes shortened.</p>\n<p>So really any business or professionals should invest time to learn People ,market and their talents</p>\n",
+            "createdAt": "2026-05-20T09:34:07.177Z",
+            "lastUpdatedAt": "2026-05-20T09:36:18.576Z",
+            "permalink": "https://app.daily.dev/posts/1kpk91osr#c-dWErBO6Cx",
+            "numUpvotes": 0,
+            "numAwards": 0,
+            "author": {
+                "id": "NKj7wHvVxo8DjcTqZgbXf",
+                "name": "Dave",
+                "username": "daveadams",
+                "image": "https://lh3.googleusercontent.com/a/ACg8ocLKrA_mnRTDowsZnKJV4TBevowRlqClFI_CXUYwvg2S9BHgJEo=s96-c",
+                "permalink": "https://app.daily.dev/daveadams"
+            },
+            "userState": {
+                "vote": 0
+            },
+            "children": []
+        },
+        {
+            "id": "5YbM6MNbb",
+            "content": "tiny little devs empowered by AI",
+            "contentHtml": "<p>tiny little devs empowered by AI</p>\n",
+            "createdAt": "2026-05-19T13:05:31.337Z",
+            "lastUpdatedAt": null,
+            "permalink": "https://app.daily.dev/posts/1kpk91osr#c-5YbM6MNbb",
+            "numUpvotes": 3,
+            "numAwards": 0,
+            "author": {
+                "id": "N403VFK9lAHNRwlSAhl1h",
+                "name": "Phillippe Michel Weir",
+                "username": "a_meb_a",
+                "image": "https://media.daily.dev/image/upload/s--BwH-uTMq--/f_auto/v1740136991/avatars/avatar_N403VFK9lAHNRwlSAhl1h",
+                "permalink": "https://app.daily.dev/a_meb_a"
+            },
+            "userState": {
+                "vote": 0
+            },
+            "children": []
+        },
+        {
+            "id": "lNrKvQqdl",
+            "content": "Short and sweet and relevant and informed \ud83d\udc99",
+            "contentHtml": "<p>Short and sweet and relevant and informed \ud83d\udc99</p>\n",
+            "createdAt": "2026-05-19T10:44:42.649Z",
+            "lastUpdatedAt": null,
+            "permalink": "https://app.daily.dev/posts/1kpk91osr#c-lNrKvQqdl",
+            "numUpvotes": 4,
+            "numAwards": 0,
+            "author": {
+                "id": "oZ34daPU4ROdCttawATt0",
+                "name": "Sandro Pacella",
+                "username": "sandropacella",
+                "image": "https://media.daily.dev/image/upload/s--IruSRaMF--/f_auto/v1731089574/avatars/avatar_oZ34daPU4ROdCttawATt0",
+                "permalink": "https://app.daily.dev/sandropacella"
+            },
+            "userState": {
+                "vote": 0
+            },
+            "children": []
+        },
+        {
+            "id": "zxkaBHY9J",
+            "content": "Loved this, the underlying message about focusing on building skills and relationships rather than just changing your job title is spot on. Reminds me of Patrick McKenzie's essay about not just being a software engineer, but a problem solver and business contributor.",
+            "contentHtml": "<p>Loved this, the underlying message about focusing on building skills and relationships rather than just changing your job title is spot on. Reminds me of Patrick McKenzie\u2019s essay about not just being a software engineer, but a problem solver and business contributor.</p>\n",
+            "createdAt": "2026-05-18T19:23:52.053Z",
+            "lastUpdatedAt": null,
+            "permalink": "https://app.daily.dev/posts/1kpk91osr#c-zxkaBHY9J",
+            "numUpvotes": 5,
+            "numAwards": 0,
+            "author": {
+                "id": "JCfNZtLPNzTFifdLCBjRk",
+                "name": "George Ongoro",
+                "username": "georgeongoro",
+                "image": "https://media.daily.dev/image/upload/s--jXl_MleY--/f_auto/v1779359556/avatars/avatar_JCfNZtLPNzTFifdLCBjRk?_a=BAMAMiWQ0",
+                "permalink": "https://app.daily.dev/georgeongoro"
+            },
+            "userState": {
+                "vote": 0
+            },
+            "children": []
+        },
+        {
+            "id": "D3ZOIofUQ",
+            "content": "I strongly sense it's just a job market FOMO. What you said is much more practical. Changing titles doesn't mean anything if you are a nobody. Connect and communicate with real people while upskilling. Good things will come alongside it.",
+            "contentHtml": "<p>I strongly sense it\u2019s just a job market FOMO. What you said is much more practical. Changing titles doesn\u2019t mean anything if you are a nobody. Connect and communicate with real people while upskilling. Good things will come alongside it.</p>\n",
+            "createdAt": "2026-05-18T16:22:43.733Z",
+            "lastUpdatedAt": null,
+            "permalink": "https://app.daily.dev/posts/1kpk91osr#c-D3ZOIofUQ",
+            "numUpvotes": 10,
+            "numAwards": 0,
+            "author": {
+                "id": "bK85rJb2OXXID2LX2wi5y",
+                "name": "Elmar Chavez",
+                "username": "elmarchavez",
+                "image": "https://media.daily.dev/image/upload/s--7PjH979T--/f_auto/v1764070614/avatars/avatar_bK85rJb2OXXID2LX2wi5y?_a=BAMAK+ZW0",
+                "permalink": "https://app.daily.dev/elmarchavez"
+            },
+            "userState": {
+                "vote": 0
+            },
+            "children": []
+        }
+    ],
+    "pagination": {
+        "hasNextPage": false,
+        "cursor": "dGltZToxNzc5MTIxMzYzNzMz"
+    }
+}
