@@ -20,3 +20,9 @@ frontend/dist/
 .env
 .env.local
 .env.*.local
+
+# daily.dev sample fixtures (kept locally for dev, not tracked)
+bookmarks.json
+comments_*.json
+post_*.json
+openapi.json
