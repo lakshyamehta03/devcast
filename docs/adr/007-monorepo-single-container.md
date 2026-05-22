@@ -2,7 +2,7 @@
 
 ## Context
 
-DevCast has two halves — a React + Vite frontend and a FastAPI backend. They have to coexist in one repo, be ergonomic to develop locally, and ship as one deployable artifact on AWS App Runner. The frontend additionally has to coexist with a Jinja2-rendered share page, and the share page's URL pattern (`/episode/{id}`) sits inside the same path namespace the React SPA wants to claim.
+DevCast has two halves — a React + Vite frontend and a FastAPI backend. They have to coexist in one repo, be ergonomic to develop locally, and ship as one deployable artifact on Amazon ECS Express Mode (see [ADR 013](013-ecs-express-mode-not-app-runner.md); the original draft of this ADR named AWS App Runner before AWS announced it was no longer accepting new customers). The frontend additionally has to coexist with a Jinja2-rendered share page, and the share page's URL pattern (`/episode/{id}`) sits inside the same path namespace the React SPA wants to claim.
 
 Three layers of integration to settle:
 
@@ -29,7 +29,7 @@ A single Dockerfile at the repo root with **two build stages**:
 - **Stage 1 (`node`):** install frontend deps, run `vite build` → produces `frontend/dist/`.
 - **Stage 2 (`python:3.12-slim`):** install ffmpeg via `apt-get`, install Python deps, copy `backend/` in, copy `frontend/dist/` to `backend/static/`, set `CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]`.
 
-One image, one container, one App Runner service.
+One image, pushed to an Amazon ECR repository, deployed as one Amazon ECS Express Mode service (see [ADR 013](013-ecs-express-mode-not-app-runner.md)).
 
 ### Dev-mode integration
 
@@ -44,7 +44,7 @@ A root-level convenience script (npm or Makefile) starts both processes together
 
 ### Production serving
 
-In production, only FastAPI/uvicorn runs. It handles three kinds of request, **registered in this exact order** to avoid the static-mount greedy-match footgun:
+In production, only FastAPI/uvicorn runs inside the ECS Express Mode task. It handles three kinds of request, **registered in this exact order** to avoid the static-mount greedy-match footgun:
 
 1. `GET /api/*` and `POST /api/*` — API routes (extract, script, episodes/finalize, episodes/{id}, bookmarks proxy, comments proxy).
 2. `GET /episode/{id}` — Jinja2-rendered share page (fetches metadata sidecar from S3, renders with OG/Twitter meta tags).

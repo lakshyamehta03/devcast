@@ -17,15 +17,15 @@ The choice space is shaped by two pressures: minimize the operational surface fo
 
 ### AWS credentials
 
-- **Production:** the App Runner service runs under an **Instance IAM role** scoped to exactly `s3:PutObject` and `s3:GetObject` on `arn:aws:s3:::<bucket>/episodes/*`. boto3 picks up the role automatically via the instance metadata service.
+- **Production:** the ECS Express Mode service ([ADR 013](013-ecs-express-mode-not-app-runner.md)) runs under a **task role** scoped to exactly `s3:PutObject` and `s3:GetObject` on `arn:aws:s3:::<bucket>/episodes/*`. boto3 picks up the role automatically via the ECS task metadata endpoint. ECS Express Mode additionally requires two AWS-managed roles that DevCast does *not* customize: a **task execution role** (managed policy `AmazonECSTaskExecutionRolePolicy`, used by ECS to pull images and write logs) and an **infrastructure role** (managed policy `AmazonECSInfrastructureRoleforExpressGatewayServices`, used by Express Mode to manage the auto-provisioned ALB). The custom task role is the only one DevCast's code interacts with.
 - **Local dev:** developers run `aws configure sso` (or `aws configure`) to land an AWS profile in `~/.aws/credentials`. The profile name (e.g. `devcast-dev`) is exported as `AWS_PROFILE` via the local `.env` file.
-- **Same code path:** boto3's default credential resolution chain finds the instance role in prod and the named profile in dev. The application never reads AWS key material itself.
+- **Same code path:** boto3's default credential resolution chain finds the task role in prod and the named profile in dev. The application never reads AWS key material itself.
 
 ### OpenAI key
 
-- **Production:** plain App Runner environment variable (`OPENAI_API_KEY`). Set in the service config, not baked into the image.
+- **Production:** plain ECS Express Mode environment variable (`OPENAI_API_KEY`). Set in the service config, not baked into the image.
 - **Local dev:** `OPENAI_API_KEY=…` in the local `.env` file. `.env` is gitignored.
-- **Future (deferred):** point the App Runner env var at an AWS Secrets Manager secret (`secrets:<arn>`) when the operational maturity warrants it. No code change required at that point.
+- **Future (deferred):** point the ECS Express Mode env var at an AWS Secrets Manager secret (Express Mode supports a "Secret" value type natively for env vars) when the operational maturity warrants it. No code change required at that point.
 
 ### Non-secret configuration
 
@@ -33,9 +33,9 @@ The same env-var pattern carries the bucket name and region:
 
 | Name | Prod source | Dev source | Used by |
 |------|-------------|------------|---------|
-| `OPENAI_API_KEY` | App Runner env var | `.env` | extract-cleaning, script-gen |
-| `DEVCAST_S3_BUCKET` | App Runner env var | `.env` | finalize write, share-page read |
-| `AWS_REGION` | App Runner env var | `.env` | boto3 client init |
+| `OPENAI_API_KEY` | ECS Express Mode env var | `.env` | extract-cleaning, script-gen |
+| `DEVCAST_S3_BUCKET` | ECS Express Mode env var | `.env` | finalize write, share-page read |
+| `AWS_REGION` | ECS Express Mode env var | `.env` | boto3 client init |
 | `AWS_PROFILE` | (unset) | `.env` only | boto3 credential resolution (dev) |
 
 ### Repo hygiene
@@ -52,17 +52,17 @@ Access logs scrub the `Authorization` header (already required by ADR 002 for th
 
 **In favour:**
 - No long-lived AWS access keys exist in the container, in the repo, or in any developer's shell history. The only AWS key material is the per-developer SSO/profile setup on their own machine, owned by AWS's standard auth model.
-- One credential model for boto3 across dev and prod — no `if os.environ.get("APP_RUNNER")` branching.
+- One credential model for boto3 across dev and prod — no environment-specific branching in the app.
 - OpenAI key blast radius in v1 is bounded by an OpenAI billing alarm (operational, not in code).
-- Migration to Secrets Manager is zero-code-change: swap the App Runner env var source from `value: <literal>` to `value-from: <secret-arn>`.
+- Migration to Secrets Manager is zero-code-change: swap the ECS Express Mode env var value type from "Environment variable" to "Secret" pointing at the secret's ARN.
 
 **Accepted tradeoffs:**
-- The OpenAI key sits in App Runner env config in plaintext (visible to anyone with `apprunner:DescribeService` IAM permission). Acceptable for v1, not acceptable forever. Secrets Manager when warranted.
+- The OpenAI key sits in ECS Express Mode env config in plaintext (visible to anyone with `ecs:DescribeServices` / `ecs:DescribeTaskDefinition` IAM permission). Acceptable for v1, not acceptable forever. Secrets Manager when warranted.
 - Local dev requires an AWS account / SSO setup. There's no "run with fake creds" mode in v1 — though tests use mocked boto3 (ADR-005-implied), so unit tests don't need real AWS access.
 
 **Operational notes for Slice 1:**
-- The App Runner Instance IAM role is provisioned outside the application image (Console, Terraform, or CloudFormation — implementer's choice).
-- The minimum IAM policy attached to the role is:
+- The custom task role is provisioned outside the application image (Console, Terraform, or CloudFormation — implementer's choice). The task execution role and infrastructure role are created automatically on first ECS Express Mode service creation.
+- The minimum IAM policy attached to the custom task role is:
   ```json
   {
     "Version": "2012-10-17",
