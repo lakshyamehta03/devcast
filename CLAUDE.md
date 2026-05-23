@@ -26,14 +26,38 @@ See `PRD.md` for the full product spec and user stories.
 
 All architectural decisions live in `docs/adr/`. Each ADR is a short Markdown file named `NNN-title.md` and follows the format: **Context → Decision → Consequences**. Before making a significant architectural change, write or update the relevant ADR first.
 
-## Project Structure (intended)
+## Project Structure
 
 ```
 /
-├── backend/          # FastAPI app
-├── frontend/         # React + Vite app
+├── backend/
+│   ├── main.py           # Wiring only — router registration + StaticFiles mount. No @app.get here.
+│   ├── proxy.py          # Shared HTTP helpers: _proxy_get, _forward_response, _require_auth_header
+│   ├── routers/          # One file per resource. Each file owns one URL namespace.
+│   │   ├── bookmarks.py  # GET /api/bookmarks
+│   │   ├── posts.py      # GET /api/posts/{id}/comments
+│   │   └── ...           # Future: script.py, finalize.py, episode.py
+│   ├── tests/            # One test file per router file (test_<router>.py)
+│   ├── templates/        # Jinja2 templates (episode.html for SSR share pages)
+│   └── static/           # Vite build output — served by StaticFiles mount
+├── frontend/
+│   └── src/
+│       ├── App.tsx        # Stage machine: wizard → bookmarks → preview → progress
+│       └── components/   # One component file + co-located .test.tsx per screen/widget
 ├── docs/
-│   └── adr/          # Architectural Decision Records
-├── PRD.md            # Product requirements
-└── CLAUDE.md         # This file
+│   └── adr/              # Architectural Decision Records
+├── PRD.md
+└── CLAUDE.md
 ```
+
+## Backend Module Conventions
+
+**`main.py` is wiring-only.** It registers routers and mounts StaticFiles. It never contains `@app.get` / `@app.post` decorators. Route handlers always live in `routers/`.
+
+**One router file per resource.** Each file in `routers/` owns one URL namespace (e.g. `/api/bookmarks`, `/api/posts`, `/episode`). Do not group unrelated routes in the same file because they share an HTTP client or helper.
+
+**Shared utilities live in `backend/proxy.py` (or a peer module), not inside `routers/`.** If two routers need the same helper, extract it to the backend root — never import from one router into another.
+
+**One test file per router file**, named `tests/test_<router>.py`. Patch `_proxy_get` at the router's import (`"routers.<name>._proxy_get"`), not at its definition in `proxy.py`.
+
+**The StaticFiles mount is always the last line of `main.py`.** Routes registered after it are silently unreachable (see ADR 007).

@@ -75,7 +75,7 @@ def test_comments_happy_path_forwards_post_id_and_sort():
     body = {"data": [{"id": "c1", "content": "Great post!"}], "pagination": {"hasNextPage": False}}
     mock_proxy = AsyncMock(return_value=_resp(200, body))
 
-    with patch("routers.bookmarks._proxy_get", new=mock_proxy):
+    with patch("routers.posts._proxy_get", new=mock_proxy):
         response = client.get(
             "/api/posts/abc123/comments?sort=newest&limit=5",
             headers={"Authorization": "Bearer mytoken"},
