@@ -7,10 +7,10 @@ const makeBookmark = (id: string, title: string) => ({
   id,
   title,
   image: '',
-  source: { name: 'DEV', logo: '' },
+  source: { name: 'DEV', image: '' },
   readTime: 3,
   numUpvotes: 10,
-  tags: [{ id: 'js', name: 'javascript' }],
+  tags: ['javascript'],
 })
 
 function mockFetch(bookmarks: ReturnType<typeof makeBookmark>[], hasNextPage = false) {
@@ -52,13 +52,14 @@ it('renders a card for each bookmark returned by the API', async () => {
 // ---------------------------------------------------------------------------
 
 it('each card shows source name, read time, upvote count, and tags', async () => {
-  const bm = { ...makeBookmark('p1', 'Detailed Post'), readTime: 5, numUpvotes: 42, tags: [{ id: 't1', name: 'typescript' }], source: { name: 'Hashnode', logo: '' } }
+  const bm = { ...makeBookmark('p1', 'Detailed Post'), readTime: 5, numUpvotes: 42, tags: ['typescript'], source: { name: 'Hashnode', image: 'https://example.com/hashnode.png' } }
   mockFetch([bm])
 
   render(<BookmarksScreen pat="test-pat" onGenerate={vi.fn()} onUnauthorized={vi.fn()} />)
 
   await screen.findByText('Detailed Post')
   expect(screen.getByText('Hashnode')).toBeInTheDocument()
+  expect(screen.getByRole('img', { name: 'Hashnode' })).toHaveAttribute('src', 'https://example.com/hashnode.png')
   expect(screen.getByText(/5 min read/i)).toBeInTheDocument()
   expect(screen.getByText(/42 upvotes/i)).toBeInTheDocument()
   expect(screen.getByText('typescript')).toBeInTheDocument()

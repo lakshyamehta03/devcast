@@ -1,13 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 
-export interface BookmarkTag {
-  id: string
-  name: string
-}
-
 export interface BookmarkSource {
   name: string
-  logo: string
+  image: string
 }
 
 export interface Bookmark {
@@ -17,7 +12,7 @@ export interface Bookmark {
   source: BookmarkSource
   readTime: number
   numUpvotes: number
-  tags: BookmarkTag[]
+  tags: string[]
 }
 
 interface PageInfo {
@@ -101,11 +96,12 @@ export function BookmarksScreen({ pat, onGenerate, onUnauthorized }: BookmarksSc
           >
             {b.image && <img src={b.image} alt="" />}
             <h3>{b.title}</h3>
+            {b.source.image && <img src={b.source.image} alt={b.source.name} />}
             <span>{b.source.name}</span>
             {b.readTime > 0 && <span>{b.readTime} min read</span>}
             <span>{b.numUpvotes} upvotes</span>
             {b.tags.map((t) => (
-              <span key={t.id}>{t.name}</span>
+              <span key={t}>{t}</span>
             ))}
           </div>
         ))}

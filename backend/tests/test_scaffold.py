@@ -35,3 +35,17 @@ def test_unknown_api_route_returns_404_json():
     assert "application/json" in response.headers["content-type"]
     body = response.json()
     assert "detail" in body
+
+
+# ---------------------------------------------------------------------------
+# _ScrubAuthFilter — Authorization header redacted from log records
+# ---------------------------------------------------------------------------
+
+def test_scrub_auth_filter_redacts_bearer_token():
+    import logging
+    from main import _ScrubAuthFilter
+    f = _ScrubAuthFilter()
+    record = logging.makeLogRecord({"msg": "GET /api/bookmarks Authorization: Bearer supersecrettoken123"})
+    f.filter(record)
+    assert "supersecrettoken123" not in record.msg
+    assert "[REDACTED]" in record.msg

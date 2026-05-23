@@ -1,3 +1,5 @@
+import logging
+import re
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -10,6 +12,19 @@ from routers.posts import router as posts_router
 BACKEND_DIR = Path(__file__).parent
 STATIC_DIR = BACKEND_DIR / "static"
 TEMPLATES_DIR = BACKEND_DIR / "templates"
+
+
+class _ScrubAuthFilter(logging.Filter):
+    _PAT = re.compile(r'(?i)(authorization[:\s]+bearer\s+)\S+')
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        record.msg = self._PAT.sub(r'\1[REDACTED]', str(record.msg))
+        return True
+
+
+_scrub = _ScrubAuthFilter()
+for _name in ("uvicorn.access", "uvicorn.error", "uvicorn"):
+    logging.getLogger(_name).addFilter(_scrub)
 
 app = FastAPI()
 app.include_router(bookmarks_router)
