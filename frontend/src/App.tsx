@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { WizardScreen, STORAGE_KEYS } from './components/WizardScreen'
+import { BookmarksScreen, type Bookmark } from './components/BookmarksScreen'
 
 type Stage = 'wizard' | 'bookmarks' | 'preview' | 'progress'
 
@@ -36,6 +37,12 @@ export default function App() {
     )
   }
 
+  const pat = sessionStorage.getItem(STORAGE_KEYS.dailydevPat) ?? ''
+
+  const handleGenerate = (_selected: Bookmark[]) => {
+    setStage('preview')
+  }
+
   return (
     <div>
       <header>
@@ -49,7 +56,17 @@ export default function App() {
         </button>
       </header>
       <main>
-        {/* bookmark grid — slice #3 */}
+        {stage === 'bookmarks' && (
+          <BookmarksScreen
+            pat={pat}
+            onGenerate={handleGenerate}
+            onUnauthorized={() => {
+              clearKeys()
+              setStage('wizard')
+            }}
+          />
+        )}
+        {/* preview / progress — slices #4+ */}
       </main>
     </div>
   )

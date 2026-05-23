@@ -8,8 +8,19 @@ const KEYS = {
   jina: 'devcast.jina_key',
 }
 
+const emptyBookmarksResponse = {
+  ok: true,
+  status: 200,
+  json: async () => ({ data: { edges: [] }, pageInfo: { hasNextPage: false, endCursor: null } }),
+} as unknown as Response
+
 describe('App', () => {
-  beforeEach(() => sessionStorage.clear())
+  beforeEach(() => {
+    sessionStorage.clear()
+    vi.spyOn(global, 'fetch').mockResolvedValue(emptyBookmarksResponse)
+  })
+
+  afterEach(() => vi.restoreAllMocks())
 
   // Cycle 2a: wizard shown when keys missing
   it('shows wizard when sessionStorage keys are absent', () => {

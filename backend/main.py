@@ -4,11 +4,14 @@ from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from routers.bookmarks import router as bookmarks_router
+
 BACKEND_DIR = Path(__file__).parent
 STATIC_DIR = BACKEND_DIR / "static"
 TEMPLATES_DIR = BACKEND_DIR / "templates"
 
 app = FastAPI()
+app.include_router(bookmarks_router)
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 
