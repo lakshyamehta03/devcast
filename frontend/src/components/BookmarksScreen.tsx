@@ -8,6 +8,8 @@ export interface BookmarkSource {
 export interface Bookmark {
   id: string
   title: string
+  url: string
+  summary: string
   image: string
   source: BookmarkSource
   readTime: number
@@ -50,9 +52,9 @@ export function BookmarksScreen({ pat, onGenerate, onUnauthorized }: BookmarksSc
     }
 
     const json = await res.json()
-    const edges: { node: Bookmark }[] = json.data?.edges ?? []
-    setBookmarks((prev) => [...prev, ...edges.map((e) => e.node)])
-    setPageInfo(json.pageInfo ?? { hasNextPage: false, endCursor: null })
+    const data: Bookmark[] = json.data ?? []
+    setBookmarks((prev) => cursor === null ? data : [...prev, ...data])
+    setPageInfo(json.pagination ?? { hasNextPage: false, endCursor: null })
     setLoading(false)
   }
 
@@ -83,39 +85,69 @@ export function BookmarksScreen({ pat, onGenerate, onUnauthorized }: BookmarksSc
   const selectedBookmarks = bookmarks.filter((b) => selected.includes(b.id))
 
   return (
-    <div>
-      <div role="list" aria-label="Bookmarks">
-        {bookmarks.map((b) => (
-          <div
-            key={b.id}
-            role="listitem"
-            onClick={() => toggleSelect(b.id)}
-            aria-pressed={selected.includes(b.id)}
-            data-selected={selected.includes(b.id)}
-            style={{ cursor: 'pointer', outline: selected.includes(b.id) ? '2px solid blue' : 'none' }}
-          >
-            {b.image && <img src={b.image} alt="" />}
-            <h3>{b.title}</h3>
-            {b.source.image && <img src={b.source.image} alt={b.source.name} />}
-            <span>{b.source.name}</span>
-            {b.readTime > 0 && <span>{b.readTime} min read</span>}
-            <span>{b.numUpvotes} upvotes</span>
-            {b.tags.map((t) => (
-              <span key={t}>{t}</span>
-            ))}
-          </div>
-        ))}
+    <div className="flex flex-col min-h-screen">
+      <div
+        role="list"
+        aria-label="Bookmarks"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4 text-left"
+      >
+        {bookmarks.map((b) => {
+          const isSelected = selected.includes(b.id)
+          return (
+            <div
+              key={b.id}
+              role="listitem"
+              onClick={() => toggleSelect(b.id)}
+              aria-pressed={isSelected}
+              data-selected={isSelected}
+              className={[
+                'bg-card border rounded-lg p-4 cursor-pointer transition-all space-y-2',
+                isSelected ? 'border-primary ring-2 ring-primary' : 'border-border hover:border-muted-foreground',
+              ].join(' ')}
+            >
+              {b.image && <img src={b.image} alt="" className="w-full h-36 object-cover rounded-md" />}
+              <h3 className="text-sm font-medium text-card-foreground leading-snug m-0">{b.title}</h3>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                {b.source.image && (
+                  <img src={b.source.image} alt={b.source.name} className="w-4 h-4 rounded-full" />
+                )}
+                <span>{b.source.name}</span>
+                {b.readTime > 0 && <span>{b.readTime} min read</span>}
+                <span>{b.numUpvotes} upvotes</span>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {b.tags.map((t) => (
+                  <span key={t} className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )
+        })}
       </div>
 
       {pageInfo.hasNextPage && <div ref={sentinelRef} aria-label="Loading more" />}
-      {loading && <div aria-label="Loading">Loading…</div>}
+      {loading && (
+        <div aria-label="Loading" className="text-center text-muted-foreground text-sm py-4">
+          Loading…
+        </div>
+      )}
 
-      <button
-        disabled={selected.length === 0}
-        onClick={() => onGenerate(selectedBookmarks)}
-      >
-        Generate Podcast!
-      </button>
+      <div className="sticky bottom-0 p-4 bg-background/80 backdrop-blur border-t border-border">
+        <button
+          disabled={selected.length === 0}
+          onClick={() => onGenerate(selectedBookmarks)}
+          className="w-full max-w-sm mx-auto block bg-primary text-primary-foreground rounded-md px-4 py-2 text-sm font-medium cursor-pointer hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Generate Podcast!
+        </button>
+        {selected.length > 0 && (
+          <p className="text-xs text-muted-foreground text-center mt-2">
+            {selected.length} article{selected.length > 1 ? 's' : ''} selected
+          </p>
+        )}
+      </div>
     </div>
   )
 }

@@ -6,6 +6,8 @@ import { BookmarksScreen } from './BookmarksScreen'
 const makeBookmark = (id: string, title: string) => ({
   id,
   title,
+  url: `https://example.com/${id}`,
+  summary: `Summary for ${title}`,
   image: '',
   source: { name: 'DEV', image: '' },
   readTime: 3,
@@ -18,8 +20,8 @@ function mockFetch(bookmarks: ReturnType<typeof makeBookmark>[], hasNextPage = f
     ok: true,
     status: 200,
     json: async () => ({
-      data: { edges: bookmarks.map((b) => ({ node: b })) },
-      pageInfo: { hasNextPage, endCursor: null },
+      data: bookmarks,
+      pagination: { hasNextPage, endCursor: null },
     }),
   } as unknown as Response)
 }

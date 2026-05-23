@@ -11,7 +11,7 @@ const KEYS = {
 const emptyBookmarksResponse = {
   ok: true,
   status: 200,
-  json: async () => ({ data: { edges: [] }, pageInfo: { hasNextPage: false, endCursor: null } }),
+  json: async () => ({ data: [], pagination: { hasNextPage: false, endCursor: null } }),
 } as unknown as Response
 
 describe('App', () => {

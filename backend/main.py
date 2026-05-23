@@ -9,6 +9,7 @@ from fastapi.templating import Jinja2Templates
 from routers.bookmarks import router as bookmarks_router
 from routers.extract import router as extract_router
 from routers.posts import router as posts_router
+from routers.script import router as script_router
 
 BACKEND_DIR = Path(__file__).parent
 STATIC_DIR = BACKEND_DIR / "static"
@@ -31,6 +32,7 @@ app = FastAPI()
 app.include_router(bookmarks_router)
 app.include_router(extract_router)
 app.include_router(posts_router)
+app.include_router(script_router)
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 
