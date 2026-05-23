@@ -5,8 +5,14 @@ description = "DevCast — daily.dev bookmarks to two-host AI podcasts"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi",
+    "uvicorn",
+    "boto3",
+    "openai",
     "httpx",
+    "python-dotenv",
+    "python-ulid",
     "jinja2",
+    "python-multipart",
 ]
 
 [dependency-groups]
