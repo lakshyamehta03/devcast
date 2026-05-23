@@ -1,0 +1,18 @@
+[project]
+name = "devcast-backend"
+version = "0.0.0"
+description = "DevCast — daily.dev bookmarks to two-host AI podcasts"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "httpx",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
