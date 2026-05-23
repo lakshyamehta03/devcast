@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from routers.bookmarks import router as bookmarks_router
+from routers.extract import router as extract_router
 from routers.posts import router as posts_router
 
 BACKEND_DIR = Path(__file__).parent
@@ -28,6 +29,7 @@ for _name in ("uvicorn.access", "uvicorn.error", "uvicorn"):
 
 app = FastAPI()
 app.include_router(bookmarks_router)
+app.include_router(extract_router)
 app.include_router(posts_router)
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
