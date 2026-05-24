@@ -49,3 +49,13 @@ def test_scrub_auth_filter_redacts_bearer_token():
     f.filter(record)
     assert "supersecrettoken123" not in record.msg
     assert "[REDACTED]" in record.msg
+
+
+def test_scrub_auth_filter_redacts_jina_key_header():
+    import logging
+    from main import _ScrubAuthFilter
+    f = _ScrubAuthFilter()
+    record = logging.makeLogRecord({"msg": "POST /api/extract x-jina-key: jinaSecretKey456"})
+    f.filter(record)
+    assert "jinaSecretKey456" not in record.msg
+    assert "[REDACTED]" in record.msg

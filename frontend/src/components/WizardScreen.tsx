@@ -33,6 +33,9 @@ export function WizardScreen({ onComplete, validatePat }: WizardScreenProps) {
   const [step, setStep] = useState<Step>(1)
   const [value, setValue] = useState('')
   const [patError, setPatError] = useState(false)
+  const [geminiError, setGeminiError] = useState(false)
+  const [jinaError, setJinaError] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [pat, setPat] = useState('')
   const [geminiKey, setGeminiKey] = useState('')
 
@@ -48,18 +51,47 @@ export function WizardScreen({ onComplete, validatePat }: WizardScreenProps) {
     }
   }
 
-  const handleStep2 = () => {
-    setGeminiKey(value)
-    setValue('')
-    setStep(3)
+  const handleStep2 = async () => {
+    setLoading(true)
+    setGeminiError(false)
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${value}`
+      )
+      if (res.ok) {
+        setGeminiKey(value)
+        setValue('')
+        setStep(3)
+      } else {
+        setGeminiError(true)
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleStep3 = () => {
-    const jinaKey = value
-    sessionStorage.setItem(STORAGE_KEYS.dailydevPat, pat)
-    sessionStorage.setItem(STORAGE_KEYS.geminiKey, geminiKey)
-    sessionStorage.setItem(STORAGE_KEYS.jinaKey, jinaKey)
-    onComplete()
+  const handleStep3 = async () => {
+    setLoading(true)
+    setJinaError(false)
+    try {
+      const res = await fetch('https://r.jina.ai/https://example.com', {
+        headers: {
+          Authorization: `Bearer ${value}`,
+          Accept: 'application/json',
+        },
+      })
+      if (res.ok) {
+        const jinaKey = value
+        sessionStorage.setItem(STORAGE_KEYS.dailydevPat, pat)
+        sessionStorage.setItem(STORAGE_KEYS.geminiKey, geminiKey)
+        sessionStorage.setItem(STORAGE_KEYS.jinaKey, jinaKey)
+        onComplete()
+      } else {
+        setJinaError(true)
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (step === 1) {
@@ -102,6 +134,11 @@ export function WizardScreen({ onComplete, validatePat }: WizardScreenProps) {
             Get your key
           </a>
         </p>
+        {geminiError && (
+          <p role="alert" className="text-destructive text-sm">
+            Invalid Gemini API key
+          </p>
+        )}
         <input
           type="text"
           aria-label="Gemini API key"
@@ -110,7 +147,7 @@ export function WizardScreen({ onComplete, validatePat }: WizardScreenProps) {
           className={inputCls}
           placeholder="AIza..."
         />
-        <button onClick={handleStep2} className={btnCls}>
+        <button onClick={handleStep2} disabled={loading} className={btnCls}>
           Continue
         </button>
       </WizardCard>
@@ -126,6 +163,11 @@ export function WizardScreen({ onComplete, validatePat }: WizardScreenProps) {
           Get your key
         </a>
       </p>
+      {jinaError && (
+        <p role="alert" className="text-destructive text-sm">
+          Invalid Jina API key
+        </p>
+      )}
       <input
         type="text"
         aria-label="Jina API key"
@@ -134,7 +176,7 @@ export function WizardScreen({ onComplete, validatePat }: WizardScreenProps) {
         className={inputCls}
         placeholder="jina_..."
       />
-      <button onClick={handleStep3} className={btnCls}>
+      <button onClick={handleStep3} disabled={loading} className={btnCls}>
         Continue
       </button>
     </WizardCard>

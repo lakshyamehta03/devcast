@@ -23,12 +23,47 @@ def _resp(status: int, body: dict, headers: dict | None = None) -> httpx.Respons
 # ---------------------------------------------------------------------------
 
 def test_bookmarks_happy_path_returns_daily_dev_body():
-    body = {"data": [{"id": "p1", "title": "Post 1"}], "pagination": {"hasNextPage": False}}
+    body = {
+        "data": [
+            {
+                "id": "1kpk91osr",
+                "title": "AI job title rebranding is just semantics, the real career advice hasn't changed",
+                "url": "https://idiallo.com/blog/you-are-an-ai-enabled-engineer-now",
+                "image": "https://media.daily.dev/image/upload/s--CxzD6vbw--/f_auto/v1722860399/public/Placeholder%2005",
+                "summary": "A reflection on the AI-driven wave of job title rebranding on LinkedIn.",
+                "type": "article",
+                "publishedAt": None,
+                "createdAt": "2026-05-18T12:00:04.738Z",
+                "commentsPermalink": "https://app.daily.dev/posts/don-t-call-yourself-a-software-engineer-you-are-an-ai-enabled-engineer--1kpk91osr",
+                "source": {
+                    "id": "idiallo",
+                    "name": "Ibrahim Diallo",
+                    "handle": "idiallo",
+                    "image": "https://media.daily.dev/image/upload/logos/idiallo",
+                },
+                "tags": ["ai", "career", "personal-branding"],
+                "readTime": 5,
+                "numUpvotes": 51,
+                "numComments": 11,
+                "author": None,
+            }
+        ],
+        "pagination": {"hasNextPage": False, "cursor": "dGltZToxNzc5NDU3OTg5MTI2"},
+    }
     with patch("routers.bookmarks._proxy_get", new=AsyncMock(return_value=_resp(200, body))):
         response = client.get("/api/bookmarks?limit=10", headers={"Authorization": "Bearer mytoken"})
 
     assert response.status_code == 200
-    assert response.json()["data"][0]["title"] == "Post 1"
+    data = response.json()["data"]
+    assert len(data) == 1
+    post = data[0]
+    assert post["id"] == "1kpk91osr"
+    assert post["title"] == "AI job title rebranding is just semantics, the real career advice hasn't changed"
+    assert post["url"] == "https://idiallo.com/blog/you-are-an-ai-enabled-engineer-now"
+    assert post["source"]["handle"] == "idiallo"
+    assert post["tags"] == ["ai", "career", "personal-branding"]
+    assert post["numUpvotes"] == 51
+    assert response.json()["pagination"]["hasNextPage"] is False
 
 
 # ---------------------------------------------------------------------------
