@@ -18,6 +18,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest",
+    "beautifulsoup4",
 ]
 
 [tool.pytest.ini_options]
