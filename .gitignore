@@ -27,3 +27,4 @@ comments_*.json
 post_*.json
 openapi.json
 fetch_fixtures.py
+.claude/worktrees/
