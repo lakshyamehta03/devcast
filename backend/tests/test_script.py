@@ -1,5 +1,5 @@
 import json
-from unittest.mock import patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -11,8 +11,7 @@ client = TestClient(app)
 
 def _body(**kwargs):
     base = {
-        "posts": [{"id": "p1", "content": "word " * 300, "source": "jina_clean"}],
-        "post_meta": [{"id": "p1", "title": "How React Server Components Work"}],
+        "content_documents": [{"id": "p1", "content": "word " * 300, "extraction_method": "jina_clean"}],
     }
     base.update(kwargs)
     return base
@@ -40,66 +39,34 @@ def _make_fake_openai(tokens: list[str]):
     return _fake
 
 
-_HAPPY_TOKENS = list(
-    "TITLE: How React Server Components Work\n"
-    "DESCRIPTION: A deep dive into RSC architecture and why it matters.\n"
-    "---\n"
-    "Alex: Welcome to DevCast.\n"
-    "Jordan: Thanks for having me.\n"
-)
-
-
 # ---------------------------------------------------------------------------
-# Cycle 1 — tracer bullet: endpoint exists and returns text/event-stream
+# Script streaming tests
 # ---------------------------------------------------------------------------
 
 def test_script_returns_event_stream():
-    with patch("routers.script._call_openai", _make_fake_openai(_HAPPY_TOKENS)):
+    tokens = ["Alex: ", "Hello ", "world.\n", "Jordan: ", "Thanks."]
+    with patch("routers.script._call_openai", _make_fake_openai(tokens)):
         resp = client.post("/api/script", json=_body())
 
     assert resp.status_code == 200
     assert "text/event-stream" in resp.headers["content-type"]
 
 
-# ---------------------------------------------------------------------------
-# Cycle 2 — first event is meta with title and description from GPT header
-# ---------------------------------------------------------------------------
-
-def test_script_first_event_is_meta_with_title_and_description():
-    with patch("routers.script._call_openai", _make_fake_openai(_HAPPY_TOKENS)):
+def test_script_streams_chunks_in_order():
+    tokens = ["Alex: ", "Hello ", "world.\n", "Jordan: ", "Thanks."]
+    with patch("routers.script._call_openai", _make_fake_openai(tokens)):
         resp = client.post("/api/script", json=_body())
 
     events = _parse_sse(resp.text)
-    assert events[0]["event"] == "meta"
-    assert events[0]["data"]["title"] == "How React Server Components Work"
-    assert events[0]["data"]["description"] == "A deep dive into RSC architecture and why it matters."
+    chunks = [e for e in events if e["event"] == "chunk"]
+    assert len(chunks) == len(tokens)
+    reconstructed = "".join(e["data"]["text"] for e in chunks)
+    assert reconstructed == "Alex: Hello world.\nJordan: Thanks."
 
-
-# ---------------------------------------------------------------------------
-# Cycle 3 — chunk events carry the script body tokens in order
-# ---------------------------------------------------------------------------
-
-def test_script_chunk_events_reconstruct_body_in_order():
-    with patch("routers.script._call_openai", _make_fake_openai(_HAPPY_TOKENS)):
-        resp = client.post("/api/script", json=_body())
-
-    events = _parse_sse(resp.text)
-    chunks = [e["data"]["text"] for e in events if e["event"] == "chunk"]
-    body = "".join(chunks)
-    assert "Alex: Welcome to DevCast." in body
-    assert "Jordan: Thanks for having me." in body
-    # meta must come before any chunk
-    first_chunk_idx = next(i for i, e in enumerate(events) if e["event"] == "chunk")
-    assert events[0]["event"] == "meta"
-    assert first_chunk_idx > 0
-
-
-# ---------------------------------------------------------------------------
-# Cycle 4 — final event is done
-# ---------------------------------------------------------------------------
 
 def test_script_last_event_is_done():
-    with patch("routers.script._call_openai", _make_fake_openai(_HAPPY_TOKENS)):
+    tokens = ["Alex: ", "Hello.\n", "Jordan: ", "Thanks."]
+    with patch("routers.script._call_openai", _make_fake_openai(tokens)):
         resp = client.post("/api/script", json=_body())
 
     events = _parse_sse(resp.text)
@@ -107,21 +74,55 @@ def test_script_last_event_is_done():
     assert events[-1]["data"] == {}
 
 
-# ---------------------------------------------------------------------------
-# Cycle 5 — fallback meta when no --- arrives in 400 token-chunks
-# ---------------------------------------------------------------------------
+def test_script_emits_error_on_openai_failure():
+    async def _failing(messages):
+        raise RuntimeError("OpenAI boom")
+        yield  # make it an async generator
 
-def test_script_emits_fallback_meta_when_separator_missing():
-    # 500 tokens with no --- separator — model went off-format
-    off_format_tokens = ["word "] * 500
-
-    with patch("routers.script._call_openai", _make_fake_openai(off_format_tokens)):
+    with patch("routers.script._call_openai", _failing):
         resp = client.post("/api/script", json=_body())
 
     events = _parse_sse(resp.text)
-    assert events[0]["event"] == "meta"
-    assert events[0]["data"]["title"] == "How React Server Components Work"
-    assert events[0]["data"]["description"] == "A podcast on How React Server Components Work"
-    # body still streams after fallback
-    chunks = [e for e in events if e["event"] == "chunk"]
-    assert len(chunks) > 0
+    error_events = [e for e in events if e["event"] == "error"]
+    assert len(error_events) == 1
+    assert error_events[0]["data"]["phase"] == "script_gen"
+    done_events = [e for e in events if e["event"] == "done"]
+    assert len(done_events) == 0
+
+
+# ---------------------------------------------------------------------------
+# Meta endpoint tests
+# ---------------------------------------------------------------------------
+
+def _make_fake_openai_response(title: str, description: str):
+    mock_response = MagicMock()
+    mock_response.choices[0].message.content = json.dumps({"title": title, "description": description})
+    return mock_response
+
+
+def test_meta_returns_title_and_description():
+    fake_response = _make_fake_openai_response("Test Title", "Test description.")
+
+    mock_client = MagicMock()
+    mock_client.chat.completions.create = AsyncMock(return_value=fake_response)
+
+    with patch("routers.script.AsyncOpenAI", return_value=mock_client):
+        resp = client.post("/api/script/meta", json={"script": "Alex: Hello.\nJordan: Hi."})
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["title"] == "Test Title"
+    assert data["description"] == "Test description."
+
+
+def test_meta_returns_500_on_openai_failure():
+    mock_client = MagicMock()
+    mock_client.chat.completions.create = AsyncMock(side_effect=RuntimeError("OpenAI boom"))
+
+    with patch("routers.script.AsyncOpenAI", return_value=mock_client):
+        resp = client.post("/api/script/meta", json={"script": "Alex: Hello.\nJordan: Hi."})
+
+    assert resp.status_code == 500
+    data = resp.json()
+    assert data["error"] == "meta_gen"
+    assert "user_message" in data

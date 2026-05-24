@@ -2,27 +2,25 @@ import json
 from typing import AsyncGenerator
 
 from fastapi import APIRouter
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from openai import AsyncOpenAI
 from pydantic import BaseModel
 
 router = APIRouter()
 
 
-class _PostContent(BaseModel):
+class _ContentDocument(BaseModel):
     id: str
     content: str
-    source: str
-
-
-class _PostMeta(BaseModel):
-    id: str
-    title: str
+    extraction_method: str
 
 
 class _ScriptRequest(BaseModel):
-    posts: list[_PostContent]
-    post_meta: list[_PostMeta]
+    content_documents: list[_ContentDocument]
+
+
+class _MetaRequest(BaseModel):
+    script: str
 
 
 async def _call_openai(messages: list) -> AsyncGenerator[str, None]:
@@ -43,64 +41,28 @@ def _sse(event: str, data: dict) -> str:
 
 
 async def _stream_script(body: _ScriptRequest) -> AsyncGenerator[str, None]:
-    content_block = "\n\n".join(p.content for p in body.posts)
+    content_block = "\n\n".join(doc.content for doc in body.content_documents)
     messages = [
         {
             "role": "system",
             "content": (
                 "You are generating a two-host podcast script. "
-                "Output in this exact format:\n\n"
-                "TITLE: <50-80 chars, no quotes, no markdown>\n"
-                "DESCRIPTION: <140-160 chars, plain text>\n"
-                "---\n"
-                "Alex: <line>\n"
-                "Jordan: <line>\n"
-                "...\n\n"
+                "Output ONLY the dialogue — no title, no description, no separator lines. "
+                "Format every line as either 'Alex: <line>' or 'Jordan: <line>'. "
                 "Alex is the lead/summarizer. Jordan is the skeptic/clarifier. "
-                "Keep the dialogue under 750 words. No prefatory text or closing remarks."
+                "Aim for approximately 1000 words of dialogue. "
+                "No prefatory text, no closing remarks, no markdown."
             ),
         },
         {"role": "user", "content": content_block},
     ]
 
-    state = "header"
-    buffer = ""
-    token_count = 0
-    title = ""
-    description = ""
-
-    fallback_title = body.post_meta[0].title[:80] if body.post_meta else "Daily Digest"
-    fallback_desc = f"A podcast on {body.post_meta[0].title}"[:160] if body.post_meta else "A podcast episode."
-
-    async for token in _call_openai(messages):
-        token_count += 1
-
-        if state == "header":
-            buffer += token
-            while "\n" in buffer:
-                line, buffer = buffer.split("\n", 1)
-                line = line.strip()
-                if line.startswith("TITLE:"):
-                    title = line[6:].strip()
-                elif line.startswith("DESCRIPTION:"):
-                    description = line[12:].strip()
-                elif line == "---":
-                    yield _sse("meta", {"title": title, "description": description})
-                    state = "body"
-                    if buffer:
-                        yield _sse("chunk", {"text": buffer})
-                        buffer = ""
-                    break
-
-            if state == "header" and token_count >= 400:
-                yield _sse("meta", {"title": fallback_title, "description": fallback_desc})
-                state = "body"
-                if buffer:
-                    yield _sse("chunk", {"text": buffer})
-                    buffer = ""
-
-        else:
+    try:
+        async for token in _call_openai(messages):
             yield _sse("chunk", {"text": token})
+    except Exception:
+        yield _sse("error", {"phase": "script_gen", "user_message": "Script generation failed. Please try again."})
+        return
 
     yield _sse("done", {})
 
@@ -108,3 +70,31 @@ async def _stream_script(body: _ScriptRequest) -> AsyncGenerator[str, None]:
 @router.post("/api/script")
 async def script(body: _ScriptRequest):
     return StreamingResponse(_stream_script(body), media_type="text/event-stream")
+
+
+@router.post("/api/script/meta")
+async def script_meta(body: _MetaRequest):
+    client = AsyncOpenAI()
+    try:
+        response = await client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "Given this podcast script, generate a title (50-80 chars, no quotes, no markdown) "
+                        "and a description (140-160 chars, plain text, suitable for Open Graph meta tags). "
+                        'Return JSON: {"title": "...", "description": "..."}.'
+                    ),
+                },
+                {"role": "user", "content": body.script},
+            ],
+            response_format={"type": "json_object"},
+        )
+        result = json.loads(response.choices[0].message.content)
+        return {"title": result["title"], "description": result["description"]}
+    except Exception:
+        return JSONResponse(
+            status_code=500,
+            content={"error": "meta_gen", "user_message": "Failed to generate episode metadata. Please try again."},
+        )
