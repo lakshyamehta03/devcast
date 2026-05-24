@@ -24,13 +24,15 @@ interface PageInfo {
 
 interface BookmarksScreenProps {
   pat: string
-  onGenerate: (selected: Bookmark[]) => void
+  onGenerate: (selectedIds: string[]) => void
   onUnauthorized: () => void
+  isGenerating?: boolean
+  extractError?: string | null
 }
 
 const API_BASE = '/api'
 
-export function BookmarksScreen({ pat, onGenerate, onUnauthorized }: BookmarksScreenProps) {
+export function BookmarksScreen({ pat, onGenerate, onUnauthorized, isGenerating = false, extractError = null }: BookmarksScreenProps) {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([])
   const [selected, setSelected] = useState<string[]>([])
   const [pageInfo, setPageInfo] = useState<PageInfo>({ hasNextPage: false, endCursor: null })
@@ -81,8 +83,6 @@ export function BookmarksScreen({ pat, onGenerate, onUnauthorized }: BookmarksSc
       return [prev[1], id] // FIFO: drop oldest
     })
   }
-
-  const selectedBookmarks = bookmarks.filter((b) => selected.includes(b.id))
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -135,12 +135,15 @@ export function BookmarksScreen({ pat, onGenerate, onUnauthorized }: BookmarksSc
       )}
 
       <div className="sticky bottom-0 p-4 bg-background/80 backdrop-blur border-t border-border">
+        {extractError && (
+          <p className="text-xs text-destructive text-center mb-2">{extractError}</p>
+        )}
         <button
-          disabled={selected.length === 0}
-          onClick={() => onGenerate(selectedBookmarks)}
+          disabled={selected.length === 0 || isGenerating}
+          onClick={() => onGenerate(selected)}
           className="w-full max-w-sm mx-auto block bg-primary text-primary-foreground rounded-md px-4 py-2 text-sm font-medium cursor-pointer hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          Generate Podcast!
+          {isGenerating ? 'Generating…' : 'Generate Podcast!'}
         </button>
         {selected.length > 0 && (
           <p className="text-xs text-muted-foreground text-center mt-2">

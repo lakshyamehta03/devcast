@@ -136,7 +136,7 @@ it('"Generate Podcast!" calls onGenerate with the selected bookmarks', async () 
   await user.click(screen.getByRole('button', { name: /generate podcast/i }))
 
   expect(onGenerate).toHaveBeenCalledOnce()
-  expect(onGenerate.mock.calls[0][0][0].id).toBe('p1')
+  expect(onGenerate.mock.calls[0][0]).toEqual(['p1'])
 })
 
 // ---------------------------------------------------------------------------
