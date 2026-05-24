@@ -54,7 +54,9 @@ export function BookmarksScreen({ pat, onGenerate, onUnauthorized, isGenerating 
     }
 
     const json = await res.json()
-    const data: Bookmark[] = json.data ?? []
+    const data: Bookmark[] = (json.data ?? []).filter(
+      (b: Bookmark) => b.url
+    )
     setBookmarks((prev) => cursor === null ? data : [...prev, ...data])
     setPageInfo(json.pagination ?? { hasNextPage: false, endCursor: null })
     setLoading(false)

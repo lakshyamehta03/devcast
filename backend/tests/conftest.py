@@ -43,11 +43,13 @@ def _build_s3_stub():
 
 @pytest.fixture(autouse=True, scope="session")
 def _auto_mock_s3():
-    """Patch routers.episodes._s3 for the entire test session with a credential-free stub.
+    """Patch routers.episodes._s3 and routers.finalize._s3 for the entire test session
+    with a credential-free stub.
 
     Individual tests that need specific S3 behaviour (e.g. NoSuchKey errors) can
     override this by calling `patch("routers.episodes._s3", ...)` inside their own
     `with` block — the innermost patch wins.
     """
-    with patch("routers.episodes._s3", _build_s3_stub()):
+    with patch("routers.episodes._s3", _build_s3_stub()), \
+         patch("routers.finalize._s3", MagicMock()):
         yield

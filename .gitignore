@@ -26,3 +26,4 @@ bookmarks.json
 comments_*.json
 post_*.json
 openapi.json
+fetch_fixtures.py

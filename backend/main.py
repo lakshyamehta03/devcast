@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from routers.bookmarks import router as bookmarks_router
 from routers.episodes import router as episodes_router
 from routers.extract import router as extract_router
+from routers.finalize import router as finalize_router
 from routers.posts import router as posts_router
 from routers.script import router as script_router
 
@@ -31,6 +32,7 @@ app = FastAPI()
 app.include_router(bookmarks_router)
 app.include_router(episodes_router)
 app.include_router(extract_router)
+app.include_router(finalize_router)
 app.include_router(posts_router)
 app.include_router(script_router)
 
