@@ -339,11 +339,11 @@ export default function App() {
     if (state.stage !== 'progress') return
     const geminiKey = sessionStorage.getItem(STORAGE_KEYS.geminiKey) ?? ''
 
-    // Timer-based progress 0→69% over ~12s
+    // Timer-based progress 0→69% over ~45s
     const startTime = Date.now()
     const progressInterval = setInterval(() => {
       const elapsed = (Date.now() - startTime) / 1000
-      const progress = Math.min(69, Math.floor((elapsed / 12) * 69))
+      const progress = Math.min(69, Math.floor((elapsed / 45) * 69))
       dispatch({ type: 'TTS_PROGRESS', progress })
     }, 200)
 
