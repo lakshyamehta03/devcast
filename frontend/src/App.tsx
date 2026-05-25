@@ -1,7 +1,8 @@
-import { useReducer } from 'react'
+import { useReducer, useEffect } from 'react'
 import { WizardScreen, STORAGE_KEYS } from './components/WizardScreen'
 import { BookmarksScreen } from './components/BookmarksScreen'
 import { PreviewScreen } from './components/PreviewScreen'
+import { ProgressScreen } from './components/ProgressScreen'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -27,7 +28,17 @@ type AppState =
   | { stage: 'wizard' }
   | { stage: 'bookmarks'; error: string | null; isGenerating: boolean }
   | { stage: 'preview'; contentDocuments: ContentDocument[]; bookmarkMeta: BookmarkMeta[]; script: ScriptStatus }
-  | { stage: 'progress'; title: string; description: string; scriptBody: string; bookmarkMeta: BookmarkMeta[] }
+  | {
+      stage: 'progress';
+      title: string;
+      description: string;
+      scriptBody: string;
+      bookmarkMeta: BookmarkMeta[];
+      progress: number;
+      phase: string;
+      error: string | null;
+      pcmAudio: Uint8Array | null;
+    }
   | { stage: 'episode'; episodeUrl: string }
 
 type Action =
@@ -41,6 +52,13 @@ type Action =
   | { type: 'SCRIPT_ERROR'; message: string }
   | { type: 'REGENERATE' }
   | { type: 'APPROVE' }
+  | { type: 'TTS_PROGRESS'; progress: number }
+  | { type: 'TTS_DONE'; pcmAudio: Uint8Array }
+  | { type: 'TTS_ERROR'; message: string }
+  | { type: 'FINALIZE_PROGRESS'; progress: number; phase: string }
+  | { type: 'FINALIZE_COMPLETE'; episodeUrl: string }
+  | { type: 'FINALIZE_ERROR'; message: string }
+  | { type: 'PROGRESS_RETRY' }
   | { type: 'BACK_TO_BOOKMARKS' }
   | { type: 'RESET_KEYS' }
 
@@ -121,7 +139,38 @@ function reducer(state: AppState, action: Action): AppState {
         description: state.script.description,
         scriptBody: state.script.body,
         bookmarkMeta: state.bookmarkMeta,
+        progress: 0,
+        phase: 'Generating audio...',
+        error: null,
+        pcmAudio: null,
       }
+
+    case 'TTS_PROGRESS':
+      if (state.stage !== 'progress') return state
+      return { ...state, progress: Math.min(69, action.progress) }
+
+    case 'TTS_DONE':
+      if (state.stage !== 'progress') return state
+      return { ...state, pcmAudio: action.pcmAudio, progress: 70, phase: 'Uploading...' }
+
+    case 'TTS_ERROR':
+      if (state.stage !== 'progress') return state
+      return { ...state, error: action.message }
+
+    case 'FINALIZE_PROGRESS':
+      if (state.stage !== 'progress') return state
+      return { ...state, progress: action.progress, phase: action.phase }
+
+    case 'FINALIZE_COMPLETE':
+      return { stage: 'episode', episodeUrl: action.episodeUrl }
+
+    case 'FINALIZE_ERROR':
+      if (state.stage !== 'progress') return state
+      return { ...state, error: action.message }
+
+    case 'PROGRESS_RETRY':
+      if (state.stage !== 'progress') return state
+      return { ...state, error: null, progress: 0, phase: 'Generating audio...', pcmAudio: null }
 
     case 'BACK_TO_BOOKMARKS':
       return { stage: 'bookmarks', error: null, isGenerating: false }
@@ -286,6 +335,136 @@ export default function App() {
     await runScriptStream(state.contentDocuments)
   }
 
+  const runTtsAndFinalize = async () => {
+    if (state.stage !== 'progress') return
+    const geminiKey = sessionStorage.getItem(STORAGE_KEYS.geminiKey) ?? ''
+
+    // Timer-based progress 0→69% over ~12s
+    const startTime = Date.now()
+    const progressInterval = setInterval(() => {
+      const elapsed = (Date.now() - startTime) / 1000
+      const progress = Math.min(69, Math.floor((elapsed / 12) * 69))
+      dispatch({ type: 'TTS_PROGRESS', progress })
+    }, 200)
+
+    try {
+      // Call Gemini TTS
+      const ttsRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent?key=${geminiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                { text: "This is an episode of DevCast, a developer podcast. Alex is the lead engineer, precise and opinionated. Jordan is an experienced skeptic who challenges assumptions." },
+                { text: state.scriptBody },
+              ]
+            }],
+            generationConfig: {
+              responseModalities: ["AUDIO"],
+              speechConfig: {
+                multiSpeakerVoiceConfig: {
+                  speakerVoiceConfigs: [
+                    { speaker: "Alex", voiceConfig: { prebuiltVoiceConfig: { voiceName: "Sadachbia" } } },
+                    { speaker: "Jordan", voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } } },
+                  ]
+                }
+              }
+            }
+          })
+        }
+      )
+
+      clearInterval(progressInterval)
+
+      if (!ttsRes.ok) {
+        if (ttsRes.status === 401) {
+          dispatch({ type: 'TTS_ERROR', message: 'Invalid Gemini API key.' })
+        } else if (ttsRes.status === 429) {
+          dispatch({ type: 'TTS_ERROR', message: 'Gemini rate limit reached. Please wait and try again.' })
+        } else {
+          dispatch({ type: 'TTS_ERROR', message: 'Audio generation failed. Please try again.' })
+        }
+        return
+      }
+
+      const data = await ttsRes.json()
+      const audioPart = data.candidates[0].content.parts.find((p: { inlineData?: unknown }) => p.inlineData)
+      const b64 = (audioPart.inlineData as { data: string }).data
+      const pcm = Uint8Array.from(atob(b64), c => c.charCodeAt(0))
+
+      dispatch({ type: 'TTS_DONE', pcmAudio: pcm })
+
+      // Now finalize
+      const metadata = JSON.stringify({
+        title: state.title,
+        description: state.description,
+        script: state.scriptBody,
+        source_bookmarks: state.bookmarkMeta.map(b => ({
+          id: b.id,
+          title: b.title,
+          url: b.url,
+          publisher_name: b.publisher_name,
+          image: b.image,
+        })),
+      })
+
+      const formData = new FormData()
+      formData.append('metadata', new Blob([metadata], { type: 'application/json' }), 'metadata.json')
+      formData.append('audio', new Blob([pcm], { type: 'application/octet-stream' }), 'audio.pcm')
+
+      const finalizeRes = await fetch('/api/episodes/finalize', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!finalizeRes.ok || !finalizeRes.body) {
+        dispatch({ type: 'FINALIZE_ERROR', message: 'Upload failed. Please try again.' })
+        return
+      }
+
+      const reader = finalizeRes.body.getReader()
+      const decoder = new TextDecoder()
+      const parser = createSseParser((event, eventData) => {
+        const snapPoints: Record<string, [number, string]> = {
+          upload_received: [75, 'Transcoding...'],
+          transcoding: [85, 'Transcoding...'],
+          s3_audio: [93, 'Saving...'],
+          s3_metadata: [98, 'Saving...'],
+        }
+        if (event === 'complete') {
+          const { episode_url } = eventData as { episode_id: string; episode_url: string }
+          dispatch({ type: 'FINALIZE_COMPLETE', episodeUrl: episode_url })
+          window.location.assign(episode_url)
+        } else if (event === 'error') {
+          const { user_message } = eventData as { phase: string; user_message: string }
+          dispatch({ type: 'FINALIZE_ERROR', message: user_message })
+        } else if (snapPoints[event]) {
+          const [progress, phase] = snapPoints[event]
+          dispatch({ type: 'FINALIZE_PROGRESS', progress, phase })
+        }
+      })
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        parser.feed(decoder.decode(value, { stream: true }))
+      }
+
+    } catch (err) {
+      clearInterval(progressInterval)
+      dispatch({ type: 'TTS_ERROR', message: 'Audio generation failed. Please try again.' })
+    }
+  }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (state.stage === 'progress' && state.pcmAudio === null && state.error === null) {
+      runTtsAndFinalize()
+    }
+  }, [state.stage, state.error, state.pcmAudio])
+
   if (state.stage === 'wizard') {
     return (
       <WizardScreen
@@ -329,8 +508,14 @@ export default function App() {
             onRetry={handleRegenerate}
           />
         )}
-        {state.stage === 'progress' && <div>Progress — slice 6</div>}
-        {state.stage === 'episode' && <div>Episode — redirect</div>}
+        {state.stage === 'progress' && (
+          <ProgressScreen
+            progress={state.progress}
+            phase={state.phase}
+            error={state.error}
+            onRetry={() => dispatch({ type: 'PROGRESS_RETRY' })}
+          />
+        )}
       </main>
     </div>
   )
