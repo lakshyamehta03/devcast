@@ -25,8 +25,8 @@
     .transcript .speaker { font-weight: 600; color: #e5e5e5; }
     .sources { margin-top: 2rem; border-top: 1px solid #262626; padding-top: 1.5rem; }
     .sources h2 { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #a3a3a3; }
-    .source-card { display: block; padding: 0.75rem; border: 1px solid #262626; border-radius: 0.5rem; margin-bottom: 0.5rem; text-decoration: none; color: #e5e5e5; }
-    .source-card:hover { border-color: #525252; }
+    .source-card, .source-card:visited, .source-card:active { display: block; padding: 0.75rem; border: 1px solid #262626; border-radius: 0.5rem; margin-bottom: 0.5rem; text-decoration: none; color: #e5e5e5; }
+    .source-card:hover { border-color: #525252; color: #ffffff; }
     .source-card .source-title { font-size: 0.875rem; font-weight: 500; }
     .source-card .source-pub { font-size: 0.75rem; color: #737373; margin-top: 0.25rem; }
     .share-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: #262626; border: 1px solid #404040; border-radius: 0.375rem; color: #e5e5e5; font-size: 0.875rem; cursor: pointer; margin-top: 1rem; }
@@ -37,7 +37,7 @@
   <div class="container">
     <h1>{{ title }}</h1>
     <audio controls src="{{ audio_url }}"></audio>
-    <button class="share-btn" onclick="navigator.clipboard.writeText(window.location.href).then(() => this.textContent = 'Copied!')">
+    <button class="share-btn" onclick="navigator.clipboard.writeText(window.location.href).then(() => { this.textContent = 'Copied!'; setTimeout(() => this.textContent = 'Copy share URL', 2000) })">
       Copy share URL
     </button>
     <div class="transcript">
