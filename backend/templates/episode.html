@@ -13,55 +13,541 @@
   <meta name="twitter:title" content="{{ title }}" />
   <meta name="twitter:description" content="{{ description }}" />
   <meta name="twitter:image" content="{{ og_image }}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
-    /* Simple, clean dark theme styling - keep it minimal */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: system-ui, -apple-system, sans-serif; background: #0a0a0a; color: #e5e5e5; line-height: 1.6; }
-    .container { max-width: 640px; margin: 0 auto; padding: 2rem 1rem; }
-    h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; }
-    audio { width: 100%; margin: 1rem 0; }
-    .transcript { margin: 2rem 0; }
-    .transcript p { margin-bottom: 0.75rem; font-size: 0.9rem; color: #a3a3a3; }
-    .transcript .speaker { font-weight: 600; color: #e5e5e5; }
-    .sources { margin-top: 2rem; border-top: 1px solid #262626; padding-top: 1.5rem; }
-    .sources h2 { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #a3a3a3; }
-    .source-card, .source-card:visited, .source-card:active { display: block; padding: 0.75rem; border: 1px solid #262626; border-radius: 0.5rem; margin-bottom: 0.5rem; text-decoration: none; color: #e5e5e5; }
-    .source-card:hover { border-color: #525252; color: #ffffff; }
-    .source-card .source-title { font-size: 0.875rem; font-weight: 500; }
-    .source-card .source-pub { font-size: 0.75rem; color: #737373; margin-top: 0.25rem; }
-    .share-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: #262626; border: 1px solid #404040; border-radius: 0.375rem; color: #e5e5e5; font-size: 0.875rem; cursor: pointer; margin-top: 1rem; }
-    .share-btn:hover { background: #333; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --surface-2: #181818;
+      --border: #222222;
+      --border-hover: #383838;
+      --text: #efefef;
+      --text-muted: #888888;
+      --text-dim: #555555;
+      --accent-a: #e879f9;   /* Alex — fuchsia */
+      --accent-b: #38bdf8;   /* Jordan — sky */
+      --accent-a-bg: rgba(232, 121, 249, 0.08);
+      --accent-b-bg: rgba(56, 189, 248, 0.08);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Subtle radial glow behind hero ── */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -20vh;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 400px;
+      background: radial-gradient(ellipse at center, rgba(232,121,249,0.06) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page-wrapper {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Nav / branding ── */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-brand {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .nav-brand-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-a);
+      box-shadow: 0 0 8px var(--accent-a);
+    }
+
+    .nav-make-own {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.35rem 0.75rem;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .nav-make-own:hover {
+      border-color: var(--border-hover);
+      color: var(--text);
+    }
+
+    /* ── Main content ── */
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+      width: 100%;
+    }
+
+    /* ── Episode header ── */
+    .episode-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 0.9rem;
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .episode-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 2.5rem;
+      max-width: 560px;
+    }
+
+    /* ── Player card ── */
+    .player-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .player-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-weight: 600;
+      margin-bottom: 0.9rem;
+    }
+
+    audio {
+      width: 100%;
+      border-radius: 8px;
+      height: 44px;
+      background: var(--surface-2);
+    }
+
+    audio::-webkit-media-controls-panel {
+      background: var(--surface-2);
+      border-radius: 8px;
+    }
+
+    audio::-webkit-media-controls-play-button {
+      background: var(--accent-a);
+      border-radius: 50%;
+    }
+
+    audio::-webkit-media-controls-current-time-display,
+    audio::-webkit-media-controls-time-remaining-display {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    audio::-webkit-media-controls-timeline {
+      accent-color: var(--accent-a);
+    }
+
+    /* ── Share button ── */
+    .share-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 1.1rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      letter-spacing: 0.01em;
+      margin-top: 0.75rem;
+    }
+
+    .share-btn::before {
+      content: '';
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='13' height='13' rx='2' ry='2'/%3E%3Cpath d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'/%3E%3C/svg%3E");
+      background-size: contain;
+      background-repeat: no-repeat;
+      flex-shrink: 0;
+    }
+
+    .share-btn:hover {
+      border-color: var(--border-hover);
+      color: var(--text);
+      background: var(--surface);
+    }
+
+    /* ── Section divider ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 2.75rem 0 1.25rem;
+    }
+
+    .section-header-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .section-header-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    /* ── Transcript ── */
+    .transcript { }
+
+    .transcript-line {
+      display: flex;
+      gap: 0.85rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+      margin-bottom: 0.35rem;
+      transition: background 0.15s;
+    }
+
+    .transcript-line:hover {
+      background: var(--surface);
+    }
+
+    .transcript-line.speaker-alex {
+      border-left: 2px solid transparent;
+    }
+
+    .transcript-line.speaker-alex:hover {
+      border-left-color: var(--accent-a);
+      background: var(--accent-a-bg);
+    }
+
+    .transcript-line.speaker-jordan {
+      border-left: 2px solid transparent;
+    }
+
+    .transcript-line.speaker-jordan:hover {
+      border-left-color: var(--accent-b);
+      background: var(--accent-b-bg);
+    }
+
+    .transcript-line.no-speaker {
+      border-left: 2px solid transparent;
+      padding-left: calc(0.85rem + 52px + 0.85rem);
+    }
+
+    .speaker-chip {
+      flex-shrink: 0;
+      width: 52px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding-top: 0.05em;
+    }
+
+    .speaker-alex .speaker-chip { color: var(--accent-a); }
+    .speaker-jordan .speaker-chip { color: var(--accent-b); }
+
+    .transcript-text {
+      font-size: 0.9rem;
+      color: #c0c0c0;
+      line-height: 1.65;
+    }
+
+    /* ── Source cards ── */
+    .sources-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .source-card,
+    .source-card:visited,
+    .source-card:active {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    }
+
+    .source-card:hover {
+      border-color: var(--border-hover);
+      background: var(--surface-2);
+      transform: translateY(-1px);
+    }
+
+    .source-card-img {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+    }
+
+    .source-card-img-placeholder {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-dim);
+      font-size: 1rem;
+    }
+
+    .source-card-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .source-title {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.35;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .source-pub {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-top: 0.2rem;
+    }
+
+    .source-card-arrow {
+      flex-shrink: 0;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+
+    .source-card:hover .source-card-arrow {
+      color: var(--text-muted);
+    }
+
+    /* ── Footer ── */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .footer-brand {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      letter-spacing: -0.01em;
+    }
+
+    .footer-brand:hover { color: var(--text-muted); }
+
+    .footer-dot {
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent-a);
+    }
+
+    .footer-text {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .footer-link {
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .footer-link:hover { color: var(--text-muted); }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .nav { padding: 1rem 1.25rem; }
+      .container { padding: 2rem 1.25rem 3rem; }
+      h1 { font-size: 1.6rem; }
+      .transcript-line.no-speaker { padding-left: 0.85rem; }
+      .footer { padding: 1.25rem; }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>{{ title }}</h1>
-    <audio controls src="{{ audio_url }}"></audio>
-    <button class="share-btn" onclick="navigator.clipboard.writeText(window.location.href).then(() => { this.textContent = 'Copied!'; setTimeout(() => this.textContent = 'Copy share URL', 2000) })">
-      Copy share URL
-    </button>
-    <div class="transcript">
-      {% for line in transcript_lines %}
-        {% if line.speaker %}
-          <p><span class="speaker">{{ line.speaker }}:</span> {{ line.text }}</p>
-        {% elif line.text %}
-          <p>{{ line.text }}</p>
-        {% endif %}
-      {% endfor %}
-    </div>
-    {% if source_bookmarks %}
-    <div class="sources">
-      <h2>Source Articles</h2>
-      {% for src in source_bookmarks %}
-        <a href="{{ src.url }}" target="_blank" rel="noopener" class="source-card">
-          <div class="source-title">{{ src.title }}</div>
-          {% if src.publisher_name %}
-            <div class="source-pub">{{ src.publisher_name }}</div>
+  <div class="page-wrapper">
+    <!-- Nav -->
+    <nav class="nav">
+      <a href="/" class="nav-brand">
+        <span class="nav-brand-dot"></span>DevCast
+      </a>
+      <a href="/" class="nav-make-own">Make your own &rarr;</a>
+    </nav>
+
+    <!-- Main -->
+    <main class="container">
+      <p class="episode-label">Episode</p>
+      <h1>{{ title }}</h1>
+      {% if description %}
+        <p class="episode-desc">{{ description }}</p>
+      {% endif %}
+
+      <!-- Player -->
+      <div class="player-card">
+        <p class="player-label">Listen</p>
+        <audio controls src="{{ audio_url }}"></audio>
+      </div>
+
+      <button class="share-btn" onclick="navigator.clipboard.writeText(window.location.href).then(() => { this.textContent = 'Copied!'; setTimeout(() => this.textContent = 'Copy share URL', 2000) })">
+        Copy share URL
+      </button>
+
+      <!-- Transcript -->
+      <div class="section-header">
+        <span class="section-header-line"></span>
+        <span class="section-header-label">Transcript</span>
+        <span class="section-header-line"></span>
+      </div>
+
+      <div class="transcript">
+        {% for line in transcript_lines %}
+          {% if line.speaker %}
+            {% if line.speaker|lower == 'alex' %}
+              <div class="transcript-line speaker-alex">
+                <span class="speaker-chip">Alex</span>
+                <span class="transcript-text">{{ line.text }}</span>
+              </div>
+            {% elif line.speaker|lower == 'jordan' %}
+              <div class="transcript-line speaker-jordan">
+                <span class="speaker-chip">Jordan</span>
+                <span class="transcript-text">{{ line.text }}</span>
+              </div>
+            {% else %}
+              <div class="transcript-line">
+                <span class="speaker-chip">{{ line.speaker }}</span>
+                <span class="transcript-text">{{ line.text }}</span>
+              </div>
+            {% endif %}
+          {% elif line.text %}
+            <div class="transcript-line no-speaker">
+              <span class="transcript-text">{{ line.text }}</span>
+            </div>
           {% endif %}
-        </a>
-      {% endfor %}
-    </div>
-    {% endif %}
+        {% endfor %}
+      </div>
+
+      <!-- Sources -->
+      {% if source_bookmarks %}
+      <div class="section-header">
+        <span class="section-header-line"></span>
+        <span class="section-header-label">Source Articles</span>
+        <span class="section-header-line"></span>
+      </div>
+
+      <div class="sources-grid">
+        {% for src in source_bookmarks %}
+          <a href="{{ src.url }}" target="_blank" rel="noopener" class="source-card">
+            {% if src.image %}
+              <img class="source-card-img" src="{{ src.image }}" alt="" loading="lazy" />
+            {% else %}
+              <div class="source-card-img-placeholder">&#9656;</div>
+            {% endif %}
+            <div class="source-card-body">
+              <div class="source-title">{{ src.title }}</div>
+              {% if src.publisher_name %}
+                <div class="source-pub">{{ src.publisher_name }}</div>
+              {% endif %}
+            </div>
+            <span class="source-card-arrow">&#8599;</span>
+          </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <a href="/" class="footer-brand">
+        <span class="footer-dot"></span>DevCast
+      </a>
+      <span class="footer-text">Powered by <a href="https://daily.dev" class="footer-link" target="_blank" rel="noopener">daily.dev</a> &middot; Voices by Gemini</span>
+    </footer>
   </div>
 </body>
 </html>
