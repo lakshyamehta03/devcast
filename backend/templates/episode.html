@@ -179,7 +179,6 @@
     }
 
     audio::-webkit-media-controls-play-button {
-      background: var(--accent-a);
       border-radius: 50%;
     }
 
@@ -522,6 +521,7 @@
 
       <div class="sources-grid">
         {% for src in source_bookmarks %}
+          {% if src.url %}
           <a href="{{ src.url }}" target="_blank" rel="noopener" class="source-card">
             {% if src.image %}
               <img class="source-card-img" src="{{ src.image }}" alt="" loading="lazy" />
@@ -536,6 +536,7 @@
             </div>
             <span class="source-card-arrow">&#8599;</span>
           </a>
+          {% endif %}
         {% endfor %}
       </div>
       {% endif %}
