@@ -13,17 +13,152 @@ interface WizardScreenProps {
 
 type Step = 1 | 2 | 3
 
-// Shared primitives — replace with shadcn/ui <Input> / <Button> / <Card> during polish
-const inputCls =
-  'w-full bg-input border border-border rounded-md px-3 py-2 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring'
-const btnCls =
-  'w-full bg-primary text-primary-foreground rounded-md px-4 py-2 text-sm font-medium cursor-pointer hover:opacity-90 disabled:opacity-40'
+const TOTAL_STEPS = 3
 
-function WizardCard({ children }: { children: React.ReactNode }) {
+function StepIndicator({ current }: { current: Step }) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-12 px-4">
-      <div className="w-full max-w-md space-y-4 bg-card border border-border rounded-xl p-8 text-left shadow-md">
-        {children}
+    <div className="flex items-center gap-3 mb-8" aria-label={`Step ${current} of ${TOTAL_STEPS}`}>
+      {Array.from({ length: TOTAL_STEPS }, (_, i) => {
+        const stepNum = (i + 1) as Step
+        const isComplete = stepNum < current
+        const isActive = stepNum === current
+        return (
+          <div key={stepNum} className="flex items-center gap-3">
+            <div
+              className={[
+                'flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold transition-all duration-300',
+                isActive
+                  ? 'bg-foreground text-background'
+                  : isComplete
+                  ? 'bg-muted-foreground/30 text-muted-foreground'
+                  : 'bg-muted text-muted-foreground/40',
+              ].join(' ')}
+              aria-hidden="true"
+            >
+              {isComplete ? (
+                <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                  <path d="M1 4l2.5 2.5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              ) : (
+                stepNum
+              )}
+            </div>
+            {i < TOTAL_STEPS - 1 && (
+              <div
+                className={[
+                  'w-8 h-px transition-colors duration-300',
+                  isComplete ? 'bg-muted-foreground/40' : 'bg-border',
+                ].join(' ')}
+                aria-hidden="true"
+              />
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function KeyField({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  placeholder: string
+}) {
+  return (
+    <div className="group relative">
+      <input
+        type="text"
+        aria-label={label}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={[
+          'w-full bg-transparent border border-border rounded-lg px-4 py-3',
+          'font-mono text-sm text-foreground placeholder:text-muted-foreground/40',
+          'focus:outline-none focus:border-foreground/50 focus:ring-0',
+          'transition-colors duration-150',
+        ].join(' ')}
+        spellCheck={false}
+        autoComplete="off"
+      />
+    </div>
+  )
+}
+
+function ActionButton({
+  onClick,
+  disabled,
+  loading,
+  children,
+}: {
+  onClick: () => void
+  disabled?: boolean
+  loading?: boolean
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled || loading}
+      className={[
+        'w-full flex items-center justify-center gap-2',
+        'bg-foreground text-background rounded-lg px-4 py-2.5',
+        'text-sm font-medium tracking-tight',
+        'hover:opacity-85 active:scale-[0.99]',
+        'disabled:opacity-35 disabled:cursor-not-allowed',
+        'transition-all duration-150',
+      ].join(' ')}
+    >
+      {loading ? (
+        <>
+          <span className="inline-block w-3.5 h-3.5 border-2 border-background/30 border-t-background rounded-full animate-spin" />
+          <span>Checking…</span>
+        </>
+      ) : (
+        children
+      )}
+    </button>
+  )
+}
+
+function ErrorAlert({ message }: { message: string }) {
+  return (
+    <p
+      role="alert"
+      className="flex items-center gap-1.5 text-destructive text-xs font-medium"
+    >
+      <span className="inline-block w-1 h-1 rounded-full bg-destructive flex-shrink-0" />
+      {message}
+    </p>
+  )
+}
+
+function WizardShell({ step, children }: { step: Step; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-center min-h-screen px-4 py-16 bg-background">
+      <div className="w-full max-w-sm">
+        {/* Brand mark */}
+        <div className="flex items-center gap-2 mb-12">
+          <div className="w-7 h-7 rounded-md bg-foreground flex items-center justify-center">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <circle cx="4" cy="7" r="2" fill="currentColor" className="text-background" />
+              <circle cx="10" cy="7" r="2" fill="currentColor" className="text-background opacity-60" />
+            </svg>
+          </div>
+          <span className="text-sm font-semibold text-foreground tracking-tight">DevCast</span>
+        </div>
+
+        <StepIndicator current={step} />
+
+        <div className="space-y-5">
+          {children}
+        </div>
       </div>
     </div>
   )
@@ -96,89 +231,116 @@ export function WizardScreen({ onComplete, validatePat }: WizardScreenProps) {
 
   if (step === 1) {
     return (
-      <WizardCard>
-        <h1 className="text-2xl font-semibold text-foreground m-0">Connect your daily.dev account</h1>
-        <p className="text-sm text-muted-foreground">
-          Enter your daily.dev Personal Access Token. You need a Plus subscription.{' '}
-          <a href="https://app.daily.dev/settings/api" target="_blank" rel="noreferrer" className="underline text-foreground">
-            Get your token
-          </a>
-        </p>
-        {patError && (
-          <p role="alert" className="text-destructive text-sm">
-            Invalid PAT or no Plus subscription
+      <WizardShell step={1}>
+        <div>
+          <h1 className="text-xl font-semibold text-foreground tracking-tight leading-tight m-0">
+            Connect your daily.dev account
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+            Requires a Plus subscription.{' '}
+            <a
+              href="https://app.daily.dev/settings/api"
+              target="_blank"
+              rel="noreferrer"
+              className="text-foreground underline underline-offset-2 decoration-border hover:decoration-foreground transition-colors"
+            >
+              Get your PAT
+            </a>
           </p>
-        )}
-        <input
-          type="text"
-          aria-label="daily.dev PAT"
+        </div>
+
+        {patError && <ErrorAlert message="Invalid PAT or no Plus subscription" />}
+
+        <KeyField
+          label="daily.dev PAT"
           value={value}
-          onChange={(e) => setValue(e.target.value)}
-          className={inputCls}
+          onChange={setValue}
           placeholder="paste your PAT here"
         />
-        <button onClick={handleStep1} className={btnCls}>
+
+        <ActionButton onClick={handleStep1}>
           Validate &amp; Continue
-        </button>
-      </WizardCard>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
+            <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </ActionButton>
+      </WizardShell>
     )
   }
 
   if (step === 2) {
     return (
-      <WizardCard>
-        <h1 className="text-2xl font-semibold text-foreground m-0">Add your Gemini API key</h1>
-        <p className="text-sm text-muted-foreground">
-          Used for text-to-speech. The free tier gives ~500k characters/month.{' '}
-          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="underline text-foreground">
-            Get your key
-          </a>
-        </p>
-        {geminiError && (
-          <p role="alert" className="text-destructive text-sm">
-            Invalid Gemini API key
+      <WizardShell step={2}>
+        <div>
+          <h1 className="text-xl font-semibold text-foreground tracking-tight leading-tight m-0">
+            Add your Gemini API key
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+            Powers text-to-speech. Free tier: ~500k chars/month.{' '}
+            <a
+              href="https://aistudio.google.com/app/apikey"
+              target="_blank"
+              rel="noreferrer"
+              className="text-foreground underline underline-offset-2 decoration-border hover:decoration-foreground transition-colors"
+            >
+              Get your key
+            </a>
           </p>
-        )}
-        <input
-          type="text"
-          aria-label="Gemini API key"
+        </div>
+
+        {geminiError && <ErrorAlert message="Invalid Gemini API key" />}
+
+        <KeyField
+          label="Gemini API key"
           value={value}
-          onChange={(e) => setValue(e.target.value)}
-          className={inputCls}
+          onChange={setValue}
           placeholder="AIza..."
         />
-        <button onClick={handleStep2} disabled={loading} className={btnCls}>
+
+        <ActionButton onClick={handleStep2} loading={loading}>
           Continue
-        </button>
-      </WizardCard>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
+            <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </ActionButton>
+      </WizardShell>
     )
   }
 
   return (
-    <WizardCard>
-      <h1 className="text-2xl font-semibold text-foreground m-0">Add your Jina API key</h1>
-      <p className="text-sm text-muted-foreground">
-        Used for article extraction. The free tier gives 1M tokens/month.{' '}
-        <a href="https://jina.ai/api-dashboard" target="_blank" rel="noreferrer" className="underline text-foreground">
-          Get your key
-        </a>
-      </p>
-      {jinaError && (
-        <p role="alert" className="text-destructive text-sm">
-          Invalid Jina API key
+    <WizardShell step={3}>
+      <div>
+        <h1 className="text-xl font-semibold text-foreground tracking-tight leading-tight m-0">
+          Add your Jina API key
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+          Used for article extraction. Free tier: 1M tokens/month.{' '}
+          <a
+            href="https://jina.ai/api-dashboard"
+            target="_blank"
+            rel="noreferrer"
+            className="text-foreground underline underline-offset-2 decoration-border hover:decoration-foreground transition-colors"
+          >
+            Get your key
+          </a>
         </p>
-      )}
-      <input
-        type="text"
-        aria-label="Jina API key"
+      </div>
+
+      {jinaError && <ErrorAlert message="Invalid Jina API key" />}
+
+      <KeyField
+        label="Jina API key"
         value={value}
-        onChange={(e) => setValue(e.target.value)}
-        className={inputCls}
+        onChange={setValue}
         placeholder="jina_..."
       />
-      <button onClick={handleStep3} disabled={loading} className={btnCls}>
+
+      <ActionButton onClick={handleStep3} loading={loading}>
         Continue
-      </button>
-    </WizardCard>
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
+          <path d="M2 6.5l2.5 2.5L10 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </ActionButton>
+    </WizardShell>
   )
 }
